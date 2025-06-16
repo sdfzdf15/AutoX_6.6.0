@@ -272,6 +272,7 @@ fun ShizukuPermissionSwitch() {
         title = "Shizuku权限",
         icon = {
             Icon(
+                modifier = Modifier.size(24.dp),
                 painter = painterResource(R.drawable.ic_ac_unit_black_48dp),
                 contentDescription = null,
                 tint = Color(0xFF153B9B)
