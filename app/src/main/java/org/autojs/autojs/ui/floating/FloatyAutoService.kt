@@ -2,10 +2,10 @@ package org.autojs.autojs.ui.floating
 
 import android.content.Intent
 import android.os.IBinder
-import com.stardust.app.foreground.AbstractBroadcastService
+import com.stardust.app.service.AbstractAutoService
 import com.stardust.enhancedfloaty.FloatyService
 
-class FloatyService : AbstractBroadcastService() {
+class FloatyAutoService : AbstractAutoService() {
     private var circularMenu: CircularMenu? = null
     override fun onCreate() {
         super.onCreate()
@@ -29,14 +29,10 @@ class FloatyService : AbstractBroadcastService() {
         return null
     }
 
-    override fun releaseResources() {
-        circularMenu?.close()
-        circularMenu = null
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        releaseResources()
+        circularMenu?.close()
+        circularMenu = null
     }
 
     companion object {

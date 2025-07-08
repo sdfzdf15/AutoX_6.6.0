@@ -65,7 +65,6 @@ import com.aiselp.autox.ui.material3.components.DialogTitle
 import com.aiselp.autox.ui.material3.components.SettingOptionSwitch
 import com.aiselp.autox.ui.material3.components.Watch
 import com.stardust.app.GlobalAppContext
-import com.stardust.app.foreground.AbstractBroadcastService.Companion.ACTION_STOP_ALL_SERVICES
 import com.stardust.app.isOpPermissionGranted
 import com.stardust.app.permission.DrawOverlaysPermission.launchCanDrawOverlaysSettings
 import com.stardust.app.permission.PermissionsSettingsUtil
@@ -837,11 +836,8 @@ private fun BottomButtons() {
 }
 
 fun exitCompletely(context: Context) {
-    EngineController.stopAllScript()
+    EngineController.appExit()
     if (context is Activity) context.finish()
-
-    // 发送广播触发所有服务停止
-    context.sendBroadcast(Intent(ACTION_STOP_ALL_SERVICES))
 }
 
 @OptIn(DelicateCoroutinesApi::class)

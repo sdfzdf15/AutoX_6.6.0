@@ -18,7 +18,7 @@ object FloatyWindowManger {
     @JvmStatic
     fun addWindow(context: Context?, window: FloatyWindow?): Boolean {
         checkNotNull(context) { "context is null" }
-        context.startService(Intent(context, FloatyService::class.java))
+        context.startService(Intent(context, FloatyAutoService::class.java))
         val hasPermission = FloatingPermission.ensurePermissionGranted(context)
         try {
             com.stardust.enhancedfloaty.FloatyService.addWindow(window)
@@ -39,16 +39,16 @@ object FloatyWindowManger {
         if (!DrawOverlaysPermission.isCanDrawOverlays(context)) {
             return false
         }
-        context.startService(Intent(context, FloatyService::class.java).apply {
-            action = FloatyService.SHOW_CIRCULAR_MENU
+        context.startService(Intent(context, FloatyAutoService::class.java).apply {
+            action = FloatyAutoService.SHOW_CIRCULAR_MENU
         })
         return true
     }
 
     fun hideCircularMenu() {
         val context = GlobalAppContext.get()
-        context.startService(Intent(context, FloatyService::class.java).apply {
-            action = FloatyService.HIED_CIRCULAR_MENU
+        context.startService(Intent(context, FloatyAutoService::class.java).apply {
+            action = FloatyAutoService.HIED_CIRCULAR_MENU
         })
     }
 

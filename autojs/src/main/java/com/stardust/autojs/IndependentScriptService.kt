@@ -13,14 +13,14 @@ import android.os.Process
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import com.stardust.app.foreground.AbstractBroadcastService
+import com.stardust.app.service.AbstractAutoService
 import com.stardust.autojs.core.pref.Pref
 import com.stardust.autojs.servicecomponents.ScriptBinder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 
-class IndependentScriptService : AbstractBroadcastService() {
+class IndependentScriptService : AbstractAutoService() {
     val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun onCreate() {
@@ -91,15 +91,10 @@ class IndependentScriptService : AbstractBroadcastService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun releaseResources() {
-        Log.d(TAG, "Releasing service resources")
-        scope.cancel()
-    }
-
     override fun onDestroy() {
-        releaseResources()
+        scope.cancel()
         super.onDestroy()
-        Log.i(TAG, "Service destroyed")
+        Log.i(TAG, "IndependentScriptService Service destroyed")
     }
 
     override fun onUnbind(intent: Intent?): Boolean {

@@ -14,14 +14,14 @@ import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import com.stardust.app.foreground.AbstractBroadcastService
+import com.stardust.app.service.AbstractAutoService
 import com.stardust.autojs.R
 
 /**
  * Created by TonyJiangWJ(https://github.com/TonyJiangWJ).
  * From [TonyJiangWJ/Auto.js](https://github.com/TonyJiangWJ/Auto.js)
  */
-class CaptureForegroundService : AbstractBroadcastService() {
+class CaptureForegroundService : AbstractAutoService() {
     val callback = object : MediaProjection.Callback() {
         override fun onStop() {
             stopServiceInternal()
@@ -91,16 +91,12 @@ class CaptureForegroundService : AbstractBroadcastService() {
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).cancel(NOTIFICATION_ID)
     }
 
-    override fun releaseResources() {
+    override fun onDestroy() {
+        super.onDestroy()
         mediaProjection?.unregisterCallback(callback)
         mediaProjection?.stop()
         removeNotification()
         stopForeground(STOP_FOREGROUND_REMOVE)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        releaseResources()
     }
 
     companion object {

@@ -89,6 +89,11 @@ class ScriptServiceConnection : ServiceConnection {
         send()
     }
 
+    suspend fun appExit() = sendBinder {
+        action = ScriptBinder.Action.APP_EXIT.id
+        send()
+    }
+
     suspend fun registerGlobalScriptListener(listener: BinderScriptListener) = sendBinder {
         action = ScriptBinder.Action.REGISTER_GLOBAL_SCRIPT_LISTENER.id
         data.writeStrongBinder(listener.toBinder())

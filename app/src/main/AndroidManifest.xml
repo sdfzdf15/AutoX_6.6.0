@@ -320,7 +320,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name="org.autojs.autojs.ui.floating.FloatyService"
+            android:name="org.autojs.autojs.ui.floating.FloatyAutoService"
             android:process="@string/text_script_process_name" />
 
         <receiver
