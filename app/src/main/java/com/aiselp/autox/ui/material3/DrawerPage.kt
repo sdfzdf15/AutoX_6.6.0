@@ -53,6 +53,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.preference.PreferenceManager
@@ -129,6 +130,7 @@ fun DrawerPage() {
                 ForegroundServiceSwitch()
                 UsageStatsPermissionSwitch()
                 ShizukuPermissionSwitch()
+                PublishNotificationSwitch()
 
                 Text(text = stringResource(id = R.string.text_script_record), style = textStyle)
                 FloatingWindowSwitch()
@@ -205,7 +207,8 @@ private fun AccessibilityServiceSwitch() {
             }
         }
     )
-    dialog.BaseDialog(onDismissRequest = { scope.launch { dialog.dismiss() } },
+    dialog.BaseDialog(
+        onDismissRequest = { scope.launch { dialog.dismiss() } },
         title = { DialogTitle(title = stringResource(R.string.text_need_to_enable_accessibility_service)) },
         positiveText = stringResource(id = R.string.text_go_to_open),
         onPositiveClick = {
@@ -814,6 +817,42 @@ private fun BottomButtons() {
             Text(text = stringResource(id = R.string.text_exit))
         }
     }
+}
+
+@Composable
+fun PublishNotificationSwitch() {
+    val context = LocalContext.current
+    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+    }
+    val enabled = remember {
+        val managerCompat = NotificationManagerCompat.from(context)
+        mutableStateOf(managerCompat.areNotificationsEnabled())
+    }
+    val activityResultLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            enabled.value = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
+    val launcherForActivityResult =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            enabled.value = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
+
+    SettingOptionSwitch(
+        icon = Icons.Default.Notifications,
+        title = stringResource(id = R.string.text_publish_notification_permission),
+        checked = enabled.value,
+        onCheckedChange = {
+//            if (it) {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                    launcherForActivityResult.launch(Manifest.permission.POST_NOTIFICATIONS)
+//                    return@SettingOptionSwitch
+//                }
+//            }
+            activityResultLauncher.launch(intent)
+        },
+        tint = Color(0xFF331E4B)
+    )
 }
 
 @OptIn(DelicateCoroutinesApi::class)
