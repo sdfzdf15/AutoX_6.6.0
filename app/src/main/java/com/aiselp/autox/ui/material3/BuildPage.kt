@@ -111,6 +111,7 @@ fun BuildPage(viewModel: BuildViewModel) {
             ConfigCard(model = viewModel)
             PackagingOptionCard(model = viewModel)
             RunConfigCard(model = viewModel)
+            SpecialPermissionsCard(model = viewModel)
             EncryptCard(model = viewModel)
             SignatureCard(model = viewModel)
         }
@@ -317,10 +318,7 @@ private fun RunConfigCard(model: BuildViewModel) {
             stringResource(id = R.string.text_stable_mode) to model::isStableMode,
             stringResource(id = R.string.text_hideLogs) to model::isHideLogs,
             stringResource(id = R.string.text_volumeUpcontrol) to model::isVolumeUpControl,
-            stringResource(id = R.string.text_required_accessibility_service) to model::isRequiredAccessibilityServices,
             stringResource(id = R.string.text_hide_accessibility_services) to model::isHideAccessibilityServices,
-            stringResource(id = R.string.text_required_background_start) to model::isRequiredBackgroundStart,
-            stringResource(id = R.string.text_required_draw_overlay) to model::isRequiredDrawOverlay,
             stringResource(id = R.string.text_display_splash) to model::displaySplash
         )) {
             CheckboxOption(v, t)
@@ -356,6 +354,34 @@ private fun RunConfigCard(model: BuildViewModel) {
             onValueChange = { model.serviceDesc = it },
             label = stringResource(id = R.string.text_service_desc_text),
             maxLines = 8,
+        )
+    }
+}
+
+@Composable
+fun SpecialPermissionsCard(model: BuildViewModel) {
+    BuildCard(stringResource(R.string.special_permissions_configuration)) {
+        Text(stringResource(R.string.special_permissions_configuration_desc))
+        Spacer(modifier = Modifier.height(8.dp))
+        CheckboxOption(
+            model::isRequiredAccessibilityServices,
+            stringResource(id = R.string.accessibility_service)
+        )
+        CheckboxOption(
+            model::isRequiredBackgroundStart,
+            stringResource(id = R.string.background_window_permission)
+        )
+        CheckboxOption(
+            model::isRequiredDrawOverlay,
+            stringResource(id = R.string.draw_overlay_permission)
+        )
+        CheckboxOption(
+            model::isRequiredFileManagerPermission,
+            stringResource(id = R.string.text_file_manager_permission)
+        )
+        CheckboxOption(
+            model::isRequiredPublishNotificationPermission,
+            stringResource(id = R.string.text_publish_notification_permission)
         )
     }
 }

@@ -49,7 +49,12 @@ class ScriptServiceConnection : ServiceConnection {
         isConnected = true
         binding?.complete()
         connected.complete()
-        binderConsoleListener.logPublish.onNext(LogEntry(level = Log.INFO, content = "Script service connected"))
+        binderConsoleListener.logPublish.onNext(
+            LogEntry(
+                level = Log.INFO,
+                content = "Script service connected"
+            )
+        )
         GlobalScope.launch {
             registerGlobalConsoleListener(binderConsoleListener)
         }
@@ -58,7 +63,12 @@ class ScriptServiceConnection : ServiceConnection {
     override fun onServiceDisconnected(name: ComponentName?) {
         isConnected = false
         binding = null
-        binderConsoleListener.logPublish.onNext(LogEntry(level = Log.ERROR, content = "Script service disconnected"))
+        binderConsoleListener.logPublish.onNext(
+            LogEntry(
+                level = Log.ERROR,
+                content = "Script service disconnected"
+            )
+        )
     }
 
     private suspend fun <T> sendBinder(n: suspend TanBinder.() -> T): T {
@@ -140,12 +150,14 @@ class ScriptServiceConnection : ServiceConnection {
 
     suspend fun awaitConnected() = withTimeout(3000) {
         if (isConnected) return@withTimeout
-        if (binding == null && application != null) {
-            bind(application!!)
-        } else {
-            throw IllegalStateException("ScriptServiceConnection not bind")
+        if (binding == null) {
+            if (application != null) {
+                bind(application!!)
+            } else {
+                throw IllegalStateException("ScriptServiceConnection not bind")
+            }
         }
-        Log.d("ScriptServiceConnection", "awaitConnected")
+        Log.d(TAG, "awaitConnected")
         binding!!.join()
     }
 
@@ -162,6 +174,7 @@ class ScriptServiceConnection : ServiceConnection {
     }
 
     companion object {
+        private const val TAG = "ScriptServiceConnection"
         val GlobalConnection by lazy { ScriptServiceConnection() }
     }
 }
