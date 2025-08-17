@@ -102,7 +102,7 @@ private const val FEEDBACK_ADDRESS = "https://github.com/aiselp/AutoX/issues"
 
 @Composable
 fun DrawerPage() {
-    ModalDrawerSheet(Modifier.width(500.dp)) {
+    ModalDrawerSheet(Modifier.width(300.dp)) {
         Column(Modifier.fillMaxSize()) {
             val textStyle = MaterialTheme.typography.titleMedium
             Column(

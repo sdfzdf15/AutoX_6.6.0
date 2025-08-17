@@ -70,7 +70,7 @@ dependencies {
     api(libs.bundles.shizuku)
     api("net.lingala.zip4j:zip4j:1.3.2")
     api("com.afollestad.material-dialogs:core:0.9.2.3")
-    api(libs.material)
+    implementation(libs.material)
     api("com.github.hyb1996:EnhancedFloaty:0.31")
     api("com.makeramen:roundedimageview:2.3.0")
     // OkHttp

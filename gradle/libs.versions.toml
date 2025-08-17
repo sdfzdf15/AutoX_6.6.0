@@ -57,7 +57,6 @@ compose-bom = "androidx.compose:compose-bom:2025.02.00"
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-compose-material = { module = "androidx.compose.material:material" }
 compose-ui = { module = "androidx.compose.ui:ui" }
 
 compose-foundation = { module = "androidx.compose.foundation:foundation" }

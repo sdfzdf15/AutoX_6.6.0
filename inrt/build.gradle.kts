@@ -135,7 +135,6 @@ dependencies {
 
     implementation(libs.androidx.activity.ktx)
     implementation(libs.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.annotation)
     implementation(libs.preference.ktx)
     implementation(libs.androidx.constraintlayout)

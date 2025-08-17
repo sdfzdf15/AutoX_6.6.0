@@ -52,19 +52,16 @@ fun ExplorerViewKt.OptionMenu(
 }
 
 @Composable
-fun ExplorerViewKt.OptionMenu2(
+fun OptionMenu2(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
+    menus: List<OptionMenu>,
     onMenuSelect: (OptionMenu) -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
-        val menus = setOf(
-            OptionMenu.RENAME,
-            OptionMenu.DELETE,
-        )
         menus.forEach {
             DropdownMenuItem(
                 text = { Text(text = stringResource(it.resId)) },
@@ -85,4 +82,9 @@ enum class OptionMenu(val resId: Int) {
     CREATE_SHORTCUT(R.string.text_send_shortcut),
     OPEN_BY_OTHER_APPS(R.string.text_open_by_other_apps),
     BUILD_APK(R.string.text_build_apk),
+
+    NAME(R.string.text_name),
+    TIME(R.string.text_time),
+    SIZE(R.string.text_size),
+    TYPE(R.string.text_type),
 }

@@ -47,7 +47,6 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.appcompat)
-    implementation(libs.material)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(project(":autojs"))
 

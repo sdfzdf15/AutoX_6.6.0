@@ -1,30 +1,21 @@
 package org.autojs.autojs.ui.filechooser
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnCheckedChanged
-import butterknife.OnClick
 import com.stardust.pio.PFile
-import com.stardust.pio.PFiles
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.script.ScriptFile
-import org.autojs.autojs.ui.explorer.ExplorerViewHelper
 import org.autojs.autojs.ui.explorer.ExplorerViewKt
+import org.autojs.autojs.ui.explorer.FileChooseExplorerItem
 import org.autojs.autojs.ui.widget.BindableViewHolder
-import org.autojs.autojs.ui.widget.CheckBoxCompat
-import org.autojs.autoxjs.R
-import org.autojs.autoxjs.databinding.FileChooseListFileBinding
 
 /**
  * Created by Stardust on 2017/10/19.
@@ -33,6 +24,10 @@ class FileChooseListView : ExplorerViewKt {
     private var mMaxChoice = 1
     private val mSelectedFiles = LinkedHashMap<PFile, Int>()
     private var mCanChooseDir = false
+    val selectedFiles: List<PFile>
+        get() {
+            return mSelectedFiles.keys.toList()
+        }
 
     constructor(context: Context) : super(context) {
         init()
@@ -50,17 +45,8 @@ class FileChooseListView : ExplorerViewKt {
         mCanChooseDir = canChooseDir
     }
 
-    val selectedFiles: List<PFile>
-        get() {
-            val list = ArrayList<PFile>(mSelectedFiles.size)
-            for ((key) in mSelectedFiles) {
-                list.add(key)
-            }
-            return list
-        }
-
     private fun init() {
-        (explorerItemListView!!.itemAnimator as SimpleItemAnimator?)?.supportsChangeAnimations =
+        (explorerItemListView.itemAnimator as SimpleItemAnimator?)?.supportsChangeAnimations =
             false
     }
 
@@ -69,25 +55,10 @@ class FileChooseListView : ExplorerViewKt {
         parent: ViewGroup?,
         viewType: Int
     ): BindableViewHolder<Any> {
-        val layoutInflater = LayoutInflater.from(context)
         return when (viewType) {
-            VIEW_TYPE_ITEM -> {
-                ExplorerItemViewHolder(
-                    FileChooseListFileBinding.inflate(layoutInflater,parent,false)
-                )
-            }
-            VIEW_TYPE_PAGE -> {
-                ExplorerPageViewHolder(
-                    inflater.inflate(
-                        R.layout.file_choose_list_directory,
-                        parent,
-                        false
-                    )
-                )
-            }
-            else -> {
-                super.onCreateViewHolder(inflater, parent, viewType)
-            }
+            VIEW_TYPE_ITEM -> ExplorerItemViewHolder(ComposeView(context))
+            VIEW_TYPE_PAGE -> ExplorerPageViewHolder(ComposeView(context))
+            else -> super.onCreateViewHolder(inflater, parent, viewType)
         }
     }
 
@@ -95,41 +66,32 @@ class FileChooseListView : ExplorerViewKt {
         if (mSelectedFiles.size == mMaxChoice) {
             val (key, positionOfItemToUncheck) = mSelectedFiles.entries.iterator().next()
             mSelectedFiles.remove(key)
-            explorerItemListView!!.adapter!!.notifyItemChanged(positionOfItemToUncheck)
+            explorerItemListView.adapter!!.notifyItemChanged(positionOfItemToUncheck)
         }
         mSelectedFiles[file] = position
     }
 
-    internal inner class ExplorerItemViewHolder(bind: FileChooseListFileBinding) :
-        BindableViewHolder<Any>(bind.root) {
-
-        var mName: TextView = bind.name
-        var mFirstChar: TextView = bind.firstChar
-        var mCheckBox: CheckBoxCompat = bind.checkbox
-        var mDesc: TextView = bind.desc
-
-        var mFirstCharBackground = mFirstChar.background as GradientDrawable
+    inner class ExplorerItemViewHolder(view: ComposeView) :
+        ExplorerViewKt.ExplorerItemViewHolder(view) {
         private var mExplorerItem: ExplorerItem? = null
+        var checked by mutableStateOf(false)
 
         init {
-            bind.item.setOnClickListener { mCheckBox.toggle() }
-            bind.checkbox.setOnCheckedChangeListener{ _, _ -> onCheckedChanged() }
+            view.setContent {
+                FileChooseExplorerItem(this)
+            }
         }
 
         override fun bind(item: Any, position: Int) {
+            super.bind(item, position)
             if (item !is ExplorerItem) return
             mExplorerItem = item
-            mName.text = ExplorerViewHelper.getDisplayName(item)
-            mDesc.text = PFiles.getHumanReadableSize(item.size)
-            mFirstChar.text = ExplorerViewHelper.getIconText(item)
-            mFirstCharBackground.setColor(ExplorerViewHelper.getIconColor(item))
-            mCheckBox.setChecked(
-                mSelectedFiles.containsKey(mExplorerItem!!.toScriptFile()),
-                false
-            )
+            checked = mSelectedFiles.containsKey(item.toScriptFile())
         }
+
         fun onCheckedChanged() {
-            if (mCheckBox.isChecked) {
+            checked = !checked
+            if (checked) {
                 check(mExplorerItem!!.toScriptFile(), absoluteAdapterPosition)
             } else {
                 mSelectedFiles.remove(mExplorerItem!!.toScriptFile())
@@ -137,49 +99,28 @@ class FileChooseListView : ExplorerViewKt {
         }
     }
 
-    @SuppressLint("NonConstantResourceId")
-    internal inner class ExplorerPageViewHolder(itemView: View?) :
-        BindableViewHolder<Any>(itemView) {
+    inner class ExplorerPageViewHolder(view: ComposeView) :
+        ExplorerViewKt.ExplorerPageViewHolder(view) {
+        var checked by mutableStateOf(false)
+        val showCheckBox = mCanChooseDir
 
-        @JvmField
-        @BindView(R.id.name)
-        var mName: TextView? = null
-
-        @JvmField
-        @BindView(R.id.checkbox)
-        var mCheckBox: CheckBoxCompat? = null
-
-        @JvmField
-        @BindView(R.id.icon)
-        var mIcon: ImageView? = null
         private var mExplorerPage: ExplorerPage? = null
-        override fun bind(data0: Any, position: Int) {
-            if (data0 !is ExplorerPage) return
-            mExplorerPage = data0
-            mName!!.text = ExplorerViewHelper.getDisplayName(data0)
-            mIcon!!.setImageResource(ExplorerViewHelper.getIcon(data0))
+        override fun bind(data: Any, position: Int) {
+            super.bind(data, position)
+            if (data !is ExplorerPage) return
+            mExplorerPage = data
             if (mCanChooseDir) {
-                mCheckBox!!.setChecked(mSelectedFiles.containsKey(data0.toScriptFile()), false)
+                checked = mSelectedFiles.containsKey(data.toScriptFile())
             }
         }
 
-        @OnClick(R.id.item)
-        fun onItemClick() {
-            enterDirectChildPage(mExplorerPage)
-        }
-
-        @OnCheckedChanged(R.id.checkbox)
         fun onCheckedChanged() {
-            if (mCheckBox!!.isChecked) {
+            checked = !checked
+            if (checked) {
                 check(mExplorerPage!!.toScriptFile(), absoluteAdapterPosition)
             } else {
                 mSelectedFiles.remove(mExplorerPage!!.toScriptFile())
             }
-        }
-
-        init {
-            ButterKnife.bind(this, itemView!!)
-            mCheckBox!!.visibility = if (mCanChooseDir) VISIBLE else GONE
         }
     }
 }

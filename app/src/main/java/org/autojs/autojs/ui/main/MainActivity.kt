@@ -10,11 +10,14 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.DrawerState
-import androidx.compose.material.Scaffold
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,12 +62,11 @@ import org.autojs.autoxjs.R
 
 data class BottomNavigationItem(val icon: Int, val label: String)
 
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val scriptListFragment by lazy { ScriptListFragment() }
     private val taskManagerFragment by lazy { TaskManagerFragmentKt() }
     private val webViewFragment by lazy { EditorAppManager() }
-    private var drawerState: DrawerState? = null
     private val viewPager: ViewPager2 by lazy { ViewPager2(this) }
 
 
@@ -89,9 +91,11 @@ class MainActivity : FragmentActivity() {
         setContent {
             val scope = rememberCoroutineScope()
             var lastBackPressedTime = remember { 0L }
+
+            val drawerState = rememberDrawerState(DrawerValue.Closed)
             BackHandler {
-                if (drawerState?.isOpen == true) {
-                    scope.launch(Dispatchers.Main) { drawerState?.close() }
+                if (drawerState.isOpen) {
+                    scope.launch(Dispatchers.Main) { drawerState.close() }
                     return@BackHandler
                 }
                 if (viewPager.currentItem == 0 && scriptListFragment.onBackPressed()) {
@@ -114,16 +118,19 @@ class MainActivity : FragmentActivity() {
                 }
             }
             AppTheme {
-                MainPage(
-                    activity = this,
-                    scriptListFragment = scriptListFragment,
-                    taskManagerFragment = taskManagerFragment,
-                    webViewFragment = webViewFragment,
-                    onDrawerState = {
-                        this.drawerState = it
-                    },
-                    viewPager = viewPager
-                )
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    gesturesEnabled = drawerState.isOpen,
+                    drawerContent = { DrawerPage() }
+                ) {
+                    MainPage(
+                        scriptListFragment = scriptListFragment,
+                        taskManagerFragment = taskManagerFragment,
+                        webViewFragment = webViewFragment,
+                        viewPager = viewPager,
+                        drawerState = drawerState,
+                    )
+                }
             }
         }
     }
@@ -136,16 +143,13 @@ class MainActivity : FragmentActivity() {
 
 @Composable
 fun MainPage(
-    activity: FragmentActivity,
     scriptListFragment: ScriptListFragment,
     taskManagerFragment: TaskManagerFragmentKt,
     webViewFragment: EditorAppManager,
-    onDrawerState: (DrawerState) -> Unit,
+    drawerState: DrawerState,
     viewPager: ViewPager2
 ) {
     val context = LocalContext.current
-    val scaffoldState = rememberScaffoldState()
-    onDrawerState(scaffoldState.drawerState)
     val scope = rememberCoroutineScope()
 
     val bottomBarItems = remember {
@@ -157,11 +161,9 @@ fun MainPage(
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         topBar = {
             MainTopAppBar(
-                openMenuRequest = { scope.launch { scaffoldState.drawerState.open() } }
+                openMenuRequest = { scope.launch { drawerState.open() } }
             ) {
                 if (currentPage == 2)
                     DocumentPageMenuButton { webViewFragment.swipeRefreshWebView.webView }
@@ -170,7 +172,6 @@ fun MainPage(
         bottomBar = {
             BottomBar(bottomBarItems, currentPage, onSelectedChange = { currentPage = it })
         },
-        drawerContent = { DrawerPage() },
     ) {
         val model: DrawerViewModel = viewModel()
         val dialogController = remember { DialogController() }
@@ -189,13 +190,12 @@ fun MainPage(
         }
 
         AndroidView(
-            modifier = Modifier
-                .padding(it),
+            modifier = Modifier.padding(it),
             factory = {
                 viewPager.apply {
                     fillMaxSize()
                     adapter = ViewPager2Adapter(
-                        activity,
+                        context as FragmentActivity,
                         scriptListFragment,
                         taskManagerFragment,
                         webViewFragment

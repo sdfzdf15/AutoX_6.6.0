@@ -6,14 +6,10 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.PopupMenu
-import android.widget.TextView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -80,6 +77,7 @@ import org.autojs.autojs.tool.Observers
 import org.autojs.autojs.ui.build.BuildActivity
 import org.autojs.autojs.ui.common.ScriptLoopDialog
 import org.autojs.autojs.ui.common.ScriptOperations
+import org.autojs.autojs.ui.filechooser.FileChooseListView
 import org.autojs.autojs.ui.viewmodel.ExplorerItemList
 import org.autojs.autojs.ui.viewmodel.ExplorerItemList.SortConfig
 import org.autojs.autojs.ui.widget.BindableViewHolder
@@ -90,8 +88,7 @@ import java.io.File
 import java.util.Stack
 
 @OptIn(ExperimentalMaterial3Api::class)
-open class ExplorerViewKt : FrameLayout,
-    PopupMenu.OnMenuItemClickListener, ViewTreeObserver.OnGlobalFocusChangeListener {
+open class ExplorerViewKt : FrameLayout, ViewTreeObserver.OnGlobalFocusChangeListener {
 
     private var onItemClickListener: ((view: View, item: ExplorerItem?) -> Unit)? = null
     private var onItemOperatedListener: ((item: ExplorerItem?) -> Unit)? = null
@@ -121,9 +118,11 @@ open class ExplorerViewKt : FrameLayout,
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     projectToolbar.Content()
-                    Box(Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(2.dp))) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(2.dp))
+                    ) {
                         AndroidView(factory = { explorerItemListView.fillMaxSize() })
                     }
                 }
@@ -383,19 +382,18 @@ open class ExplorerViewKt : FrameLayout,
             OptionMenu.BUILD_APK -> BuildActivity.start(context, item.path)
             OptionMenu.OPEN_BY_OTHER_APPS -> openByOtherApps(item.toScriptFile())
             OptionMenu.CREATE_SHORTCUT -> operations.createShortcut(item.toScriptFile())
+            else -> {}
         }
     }
 
-    override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_sort_by_date -> sort(ExplorerItemList.SORT_TYPE_DATE, dirSortMenuShowing)
-            R.id.action_sort_by_type -> sort(ExplorerItemList.SORT_TYPE_TYPE, dirSortMenuShowing)
-            R.id.action_sort_by_name -> sort(ExplorerItemList.SORT_TYPE_NAME, dirSortMenuShowing)
-            R.id.action_sort_by_size -> sort(ExplorerItemList.SORT_TYPE_SIZE, dirSortMenuShowing)
-
-            else -> return false
+    fun onMenuSelect(optionMenu: OptionMenu) {
+        when (optionMenu) {
+            OptionMenu.NAME -> sort(ExplorerItemList.SORT_TYPE_NAME, dirSortMenuShowing)
+            OptionMenu.TIME -> sort(ExplorerItemList.SORT_TYPE_DATE, dirSortMenuShowing)
+            OptionMenu.SIZE -> sort(ExplorerItemList.SORT_TYPE_SIZE, dirSortMenuShowing)
+            OptionMenu.TYPE -> sort(ExplorerItemList.SORT_TYPE_TYPE, dirSortMenuShowing)
+            else -> {}
         }
-        return true
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -425,13 +423,7 @@ open class ExplorerViewKt : FrameLayout,
             VIEW_TYPE_PAGE -> ExplorerPageViewHolder(ComposeView(context))
 
             else -> {
-                CategoryViewHolder(
-                    inflater.inflate(
-                        R.layout.script_file_list_category,
-                        parent,
-                        false
-                    )
-                )
+                CategoryViewHolder(ComposeView(context))
             }
         }
     }
@@ -509,7 +501,7 @@ open class ExplorerViewKt : FrameLayout,
         }
     }
 
-    inner class ExplorerItemViewHolder internal constructor(view: ComposeView) :
+    open inner class ExplorerItemViewHolder(view: ComposeView) :
         BindableViewHolder<Any>(view) {
         var name by mutableStateOf("")
         var firstChar by mutableStateOf("J")
@@ -525,18 +517,7 @@ open class ExplorerViewKt : FrameLayout,
 
         init {
             view.setContent {
-                ExplorerItem(
-                    name = name,
-                    desc = desc,
-                    firstChar = firstChar,
-                    firstCharBackground = firstCharBackground,
-                    editVisibility = editVisibility,
-                    runVisibility = runVisibility,
-                    onItemClick = { onItemClick() },
-                    run = { run() },
-                    edit = ::edit,
-                    more = { showMenu = true },
-                ) {
+                ExplorerItem(this) {
                     explorerItem?.let {
                         OptionMenu(
                             expanded = showMenu,
@@ -559,7 +540,7 @@ open class ExplorerViewKt : FrameLayout,
             runVisibility = item.isExecutable
         }
 
-        private fun onItemClick() {
+        fun onItemClick() {
             onItemClickListener?.invoke(itemView, explorerItem)
             onItemOperatedListener?.invoke(explorerItem)
         }
@@ -574,7 +555,7 @@ open class ExplorerViewKt : FrameLayout,
     }
 
 
-    inner class ExplorerPageViewHolder internal constructor(
+    open inner class ExplorerPageViewHolder(
         view: ComposeView,
     ) : BindableViewHolder<Any>(view) {
 
@@ -603,18 +584,25 @@ open class ExplorerViewKt : FrameLayout,
                         )
                         Spacer(Modifier.width(16.dp))
                         Text(text = name, modifier = Modifier.weight(1f))
-                        var show by remember { mutableStateOf(false) }
-                        if (!optionsVisibility) IconButton(onClick = { show = true }) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(R.drawable.ic_more_vert_black_24dp),
-                                contentDescription = null
+                        if (this@ExplorerPageViewHolder is FileChooseListView.ExplorerPageViewHolder) {
+                            if (showCheckBox) Checkbox(
+                                checked = checked,
+                                onCheckedChange = { onCheckedChanged() }
                             )
-                            OptionMenu2(
-                                expanded = show,
-                                onDismissRequest = { show = false },
-                                onMenuSelect = { show = false; onMenuSelect(it, explorerPage!!) }
-                            )
+                        } else {
+                            var show by remember { mutableStateOf(false) }
+                            if (!optionsVisibility) IconButton(onClick = { show = true }) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(R.drawable.ic_more_vert_black_24dp),
+                                    contentDescription = null
+                                )
+                                OptionMenu2(
+                                    expanded = show,
+                                    onDismissRequest = { show = false },
+                                    listOf(OptionMenu.RENAME, OptionMenu.DELETE)
+                                ) { show = false; onMenuSelect(it, explorerPage!!) }
+                            }
                         }
                     }
                 }
@@ -634,69 +622,64 @@ open class ExplorerViewKt : FrameLayout,
         }
     }
 
-    internal inner class CategoryViewHolder(itemView: View) :
-        BindableViewHolder<Any>(itemView) {
-        private val title: TextView = itemView.findViewById(R.id.title)
-        private val sort: ImageView = itemView.findViewById(R.id.sort)
-        private val sortOrder: ImageView = itemView.findViewById(R.id.order)
-        private val goBack: ImageView = itemView.findViewById(R.id.back)
-        private val arrow: ImageView = itemView.findViewById(R.id.collapse)
+    inner class CategoryViewHolder(val view: ComposeView) :
+        BindableViewHolder<Any>(view) {
+        var title by mutableStateOf("")
+        var showGoBack by mutableStateOf(false)
+        var sortOrder by mutableStateOf(true)
+        var arrowCollapsed by mutableStateOf(true)
+        var showMenu by mutableStateOf(false)
         private var isDir = false
 
         init {
-            sortOrder.setOnClickListener { changeSortOrder() }
-            sort.setOnClickListener { showSortOptions() }
-            goBack.setOnClickListener {
-                if (canGoBack()) {
-                    goBack()
+            view.setContent {
+                CategoryItem(this) {
+                    OptionMenu2(
+                        expanded = showMenu, onDismissRequest = { showMenu = false },
+                        listOf(
+                            OptionMenu.NAME, OptionMenu.TIME, OptionMenu.SIZE, OptionMenu.TIME
+                        )
+                    ) {
+                        showMenu = false
+                        onMenuSelect(it)
+                    }
                 }
             }
-            itemView.findViewById<View>(R.id.title_container).setOnClickListener {
-                collapseOrExpand()
-            }
+        }
+
+        fun goBack2() {
+            if (canGoBack()) goBack()
         }
 
         override fun bind(isDirCategory: Any, position: Int) {
             if (isDirCategory !is Boolean) return
-            title.setText(if (isDirCategory) R.string.text_directory else R.string.text_file)
+            title =
+                view.context.getString(if (isDirCategory) R.string.text_directory else R.string.text_file)
             isDir = isDirCategory
-            if (isDirCategory && canGoBack()) {
-                goBack.visibility = VISIBLE
-            } else {
-                goBack.visibility = GONE
-            }
+            showGoBack = isDirCategory && canGoBack()
             if (isDirCategory) {
-                arrow.rotation = if (currentPageState.dirsCollapsed) -90f else 0.toFloat()
-                sortOrder.setImageResource(if (explorerItemList.isDirSortedAscending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+                arrowCollapsed = currentPageState.dirsCollapsed
+                sortOrder = explorerItemList.isDirSortedAscending
             } else {
-                arrow.rotation = if (currentPageState.filesCollapsed) -90f else 0.toFloat()
-                sortOrder.setImageResource(if (explorerItemList.isFileSortedAscending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+                arrowCollapsed = currentPageState.filesCollapsed
+                sortOrder = explorerItemList.isFileSortedAscending
             }
         }
 
 
-        private fun changeSortOrder() {
+        fun changeSortOrder() {
             if (isDir) {
-                sortOrder.setImageResource(if (explorerItemList.isDirSortedAscending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+                sortOrder = explorerItemList.isDirSortedAscending
                 explorerItemList.isDirSortedAscending = !explorerItemList.isDirSortedAscending
                 sort(explorerItemList.dirSortType, isDir)
             } else {
-                sortOrder.setImageResource(if (explorerItemList.isFileSortedAscending) R.drawable.ic_ascending_order else R.drawable.ic_descending_order)
+                sortOrder = explorerItemList.isFileSortedAscending
                 explorerItemList.isFileSortedAscending = !explorerItemList.isFileSortedAscending
                 sort(explorerItemList.fileSortType, isDir)
             }
         }
 
-        private fun showSortOptions() {
-            val popupMenu = PopupMenu(context, sort)
-            popupMenu.inflate(R.menu.menu_sort_options)
-            popupMenu.setOnMenuItemClickListener(this@ExplorerViewKt)
-            dirSortMenuShowing = isDir
-            popupMenu.show()
-        }
-
-
-        private fun collapseOrExpand() {
+        fun collapseOrExpand() {
             if (isDir) {
                 currentPageState.dirsCollapsed = !currentPageState.dirsCollapsed
             } else {

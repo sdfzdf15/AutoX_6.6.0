@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.filechooser
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.aiselp.autox.ui.material3.components.BaseDialog
@@ -44,6 +45,11 @@ class FileChooserDialogBuilder(context: Context, title: String) {
             negativeText = stringResource(R.string.cancel),
             onNegativeClick = { dismiss() }
         ) {
+            BackHandler {
+                if (mFileChooseListView.canGoBack()) {
+                    mFileChooseListView.goBack()
+                } else dismiss()
+            }
             AndroidView(
                 factory = { mFileChooseListView }
             )

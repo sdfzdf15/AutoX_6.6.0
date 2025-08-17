@@ -21,12 +21,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 //        multiDexEnabled = true
         buildConfigField("boolean", "isMarket", "false")
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments["resourcePackageName"] = applicationId.toString()
-                arguments["androidManifestFile"] = "$projectDir/src/main/AndroidManifest.xml"
-            }
-        }
+
         resourceConfigurations.addAll(
             listOf("zh", "en", "es", "ar", "ja", "zh_TW", "fr", "de", "it", "ko", "ru", "tr", "lt")
         )
@@ -158,7 +153,6 @@ dependencies {
     implementation(libs.androidx.webkit)
 
     implementation(libs.compose.ui)
-    implementation(libs.compose.material)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.mlkit.common)
     androidTestImplementation(libs.compose.ui.test.junit4)
@@ -176,7 +170,6 @@ dependencies {
     implementation(libs.preference.ktx)
     implementation(libs.appcompat) //
 
-    implementation(libs.material)
     implementation(libs.compose.material3)
     implementation(libs.compose.material3.window.size)
     implementation(libs.compose.material3.adaptive.navigation.suite)
