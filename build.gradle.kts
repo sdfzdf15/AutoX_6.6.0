@@ -23,7 +23,6 @@ buildscript {
         classpath("com.android.tools.build:gradle:8.5.0")
         classpath(kotlin("gradle-plugin", version = kotlin_version))
         classpath("com.jakewharton:butterknife-gradle-plugin:10.2.3")
-        classpath(libs.okhttp)
     }
 }
 

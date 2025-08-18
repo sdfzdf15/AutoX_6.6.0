@@ -93,32 +93,37 @@ dependencies {
     implementation("cz.adaptech:tesseract4android:4.1.1")
     implementation(libs.bundles.mlkit)
 }
-
-tasks.register("buildJsModule") {
+tasks.register<Exec>("buildV7Api") {
     group = "build"
     val v7ApiDir = File(projectDir, "src/main/js/v7-api")
     val v7ModuleDir = File(projectDir, "src/main/assets/v7modules")
-
-    val v6ApiDir = File(projectDir, "src/main/js/v6-api")
-    val v6ModuleDir = File(projectDir, "src/main/assets/v6modules")
-    doFirst {
-        exec {
-            workingDir = v7ApiDir
-            execCommand("node build.mjs")
-        }
-        exec {
-            workingDir = v6ApiDir
-            execCommand("node build.mjs")
-        }
+    workingDir = v7ApiDir
+    execCommand("node build.mjs")
+    doLast {
         copy {
             delete(v7ModuleDir)
             from(File(v7ApiDir, "dist"))
             into(v7ModuleDir)
         }
+    }
+}
+
+tasks.register<Exec>("buildV6Api") {
+    group = "build"
+    val v6ApiDir = File(projectDir, "src/main/js/v6-api")
+    val v6ModuleDir = File(projectDir, "src/main/assets/v6modules")
+    workingDir = v6ApiDir
+    execCommand("node build.mjs")
+    doLast {
         copy {
             delete(v6ModuleDir)
             from(File(v6ApiDir, "dist"))
             into(v6ModuleDir)
         }
     }
+}
+
+tasks.register("buildJsModule") {
+    group = "build"
+    dependsOn("buildV6Api", "buildV7Api")
 }
