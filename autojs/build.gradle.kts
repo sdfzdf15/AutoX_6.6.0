@@ -83,11 +83,11 @@ dependencies {
     api(project(path = ":LocalRepo:emulatorview"))
     api(project(path = ":LocalRepo:term"))
     api(project(path = ":LocalRepo:p7zip"))
-    api(project(path = ":LocalRepo:OpenCV"))
     api(project(":paddleocr"))
     api(libs.mozilla.rhino)
     api(libs.mozilla.rhino.xml)
     api(libs.mozilla.rhino.tools)
+    implementation(libs.opencv)
     // libs
     api(fileTree("./libs") { include("dx.jar") })
     implementation("cz.adaptech:tesseract4android:4.1.1")

@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.Gravity
@@ -26,8 +25,6 @@ import com.stardust.util.ScreenMetrics
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.functions.Consumer
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.opencv.core.Point
 import org.opencv.core.Rect
@@ -48,9 +45,6 @@ class Images(
     private val mScreenCaptureRequester: ScreenCaptureRequester
 ) {
     private val mScreenMetrics: ScreenMetrics = mScriptRuntime.screenMetrics
-
-    @Volatile
-    private var mOpenCvInitialized = false
     private val disposables = mutableListOf<Disposable>()
 
     @ScriptVariable
@@ -286,30 +280,14 @@ class Images(
     }
 
     fun initOpenCvIfNeeded() {
-        if (mOpenCvInitialized || OpenCVHelper.isInitialized()) {
+        if (OpenCVHelper.isInitialized.isCompleted) {
             return
         }
         val currentActivity = mScriptRuntime.app.currentActivity
         val context = currentActivity ?: mContext
         mScriptRuntime.console.info("opencv initializing")
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            OpenCVHelper.initIfNeeded(context) {
-                mOpenCvInitialized = true
-                mScriptRuntime.console.info("opencv initialized")
-            }
-        } else {
-            runBlocking {
-                val result = Job()
-                launch {
-                    OpenCVHelper.initIfNeeded(context) {
-                        result.complete()
-                    }
-                }
-                result.join()
-                mOpenCvInitialized = true
-                mScriptRuntime.console.info("opencv initialized")
-            }
-        }
+        OpenCVHelper.initIfNeeded(context)
+        mScriptRuntime.console.info("opencv initialized")
     }
 
 

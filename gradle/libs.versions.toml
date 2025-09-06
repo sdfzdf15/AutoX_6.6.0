@@ -70,6 +70,8 @@ compose-animation = { module = "androidx.compose.animation:animation" }
 mozilla-rhino = "org.mozilla:rhino:1.8.0"
 mozilla-rhino-xml = "org.mozilla:rhino-xml:1.8.0"
 mozilla-rhino-tools = "org.mozilla:rhino-tools:1.8.0"
+# opencv
+opencv = "org.opencv:opencv:4.12.0"
 # commons
 commons-exec = "org.apache.commons:commons-exec:1.5.0"
 commons-io = "commons-io:commons-io:2.6"
