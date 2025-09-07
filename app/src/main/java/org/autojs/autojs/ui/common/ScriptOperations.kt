@@ -24,6 +24,7 @@ import com.stardust.app.DialogUtils
 import com.stardust.app.GlobalAppContext.post
 import com.stardust.autojs.servicecomponents.EngineController
 import com.stardust.pio.PFile
+import com.stardust.pio.PFiles
 import com.stardust.pio.PFiles.copy
 import com.stardust.pio.PFiles.createIfNotExists
 import com.stardust.pio.PFiles.deleteRecursively
@@ -32,12 +33,9 @@ import com.stardust.pio.PFiles.getNameWithoutExtension
 import com.stardust.pio.PFiles.write
 import com.stardust.pio.UncheckedIOException
 import com.stardust.toast
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
-import io.reactivex.internal.functions.ObjectHelper
-import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -57,6 +55,7 @@ import org.autojs.autojs.ui.timing.TimedTaskSettingActivity
 import org.autojs.autoxjs.R
 import java.io.File
 import java.io.IOException
+import kotlin.io.path.Path
 
 /**
  * Created by Stardust on 2017/7/31.
@@ -93,11 +92,11 @@ class ScriptOperations {
 
     fun newScriptFileForScript(script: String?) {
         showFileNameInputDialog("", "js")
-            .subscribe(Consumer { input: String? ->
+            .subscribe { input: String ->
                 createScriptFile(
                     this.currentDirectoryPath + input + ".js", script, false
                 )
-            })
+            }
     }
 
     private val currentDirectoryPath: String
@@ -128,26 +127,33 @@ class ScriptOperations {
         }
     }
 
-    fun importFile(pathFrom: String): Observable<String?>? {
-        return showFileNameInputDialog(getNameWithoutExtension(pathFrom), getExtension(pathFrom))
+    fun importFile(pathFrom: String): Single<String> {
+        val ext = getExtension(pathFrom)
+        return showFileNameInputDialog(getNameWithoutExtension(pathFrom), ext)
             .observeOn(Schedulers.io())
-            .map({ input: String? ->
-                val pathTo = this.currentDirectoryPath + input + "." + getExtension(pathFrom)
-                if (copy(pathFrom, pathTo)) {
+            .map { input: String ->
+                val pathTo = File(
+                    this.currentDirectoryPath,
+                    if (ext.isEmpty()) input else "$input.$ext"
+                )
+                if (File(pathFrom).isDirectory) {
+                    PFiles.copyDirectory(Path(pathFrom), pathTo.toPath())
+                    showMessage(R.string.text_import_succeed)
+                } else if (copy(pathFrom, pathTo.path)) {
                     showMessage(R.string.text_import_succeed)
                 } else {
                     showMessage(R.string.text_import_fail)
                 }
-                pathTo
-            })
+                pathTo.path
+            }
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext(Consumer { path: String? ->
+            .doOnSuccess { path: String? ->
                 notifyFileCreated(
                     this.currentDirectory, ScriptFile(
                         path!!
                     )
                 )
-            })
+            }
     }
 
 
@@ -168,14 +174,11 @@ class ScriptOperations {
     }
 
 
-    private fun showFileNameInputDialog(prefix: String?, ext: String?): Observable<String> {
+    private fun showFileNameInputDialog(prefix: String?, ext: String?): Single<String> {
         return showNameInputDialog(prefix)
     }
 
-    private fun showNameInputDialog(
-        prefix: String?,
-    ): Observable<String> {
-        val input = PublishSubject.create<String>()
+    private fun showNameInputDialog(prefix: String?) = Single.create { emitter ->
         val dialog = ComposeDialog(mContext) {
             val state = remember { mutableStateOf(prefix ?: "") }
             BaseDialog(
@@ -183,11 +186,10 @@ class ScriptOperations {
                 positiveText = stringResource(R.string.ok),
                 onPositiveClick = {
                     dismiss()
-                    input.onNext(state.value)
-                    input.onComplete()
+                    emitter.onSuccess(state.value)
                 },
                 negativeText = stringResource(R.string.cancel),
-                onNegativeClick = { dismiss() }
+                onNegativeClick = { dismiss(); }
             ) {
                 TextField(
                     value = state.value,
@@ -197,10 +199,7 @@ class ScriptOperations {
                 )
             }
         }
-        DialogUtils.showDialog(
-            dialog
-        )
-        return input
+        DialogUtils.showDialog(dialog)
     }
 
 
@@ -209,7 +208,7 @@ class ScriptOperations {
         showNameInputDialog(originalName)
             .subscribe({ newName: String? ->
                 val newItem = item.rename(newName)
-                if (ObjectHelper.equals(newItem.toScriptFile(), item.toScriptFile())) {
+                if (newItem.toScriptFile() == item.toScriptFile()) {
                     showMessage(R.string.error_cannot_rename)
                     throw IOException()
                 }
@@ -276,7 +275,7 @@ class ScriptOperations {
         FileChooserDialogBuilder(mContext, mContext.getString(R.string.text_select_file_to_import))
             .dir(Environment.getExternalStorageDirectory().path)
             .justScriptFile()
-            .singleChoice { file: PFile? -> importFile(file!!.getPath())!!.subscribe() }
+            .singleChoice { file: PFile? -> importFile(file!!.path).subscribe() }
             .show()
     }
 

@@ -1,6 +1,5 @@
 package org.autojs.autojs.ui.explorer
 
-import android.util.Log
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -11,37 +10,38 @@ import org.autojs.autojs.model.explorer.ExplorerSampleItem
 import org.autojs.autoxjs.R
 
 
+fun ExplorerItem.createOptionMenu(): MutableList<OptionMenu> {
+    val menus = mutableListOf<OptionMenu>()
+    if (isExecutable) {
+        menus.add(OptionMenu.RUN_REPEATEDLY)
+        menus.add(OptionMenu.TIMED_TASK)
+        menus.add(OptionMenu.CREATE_SHORTCUT)
+        menus.add(OptionMenu.OPEN_BY_OTHER_APPS)
+        menus.add(OptionMenu.BUILD_APK)
+    }
+    if (canDelete()) {
+        menus.add(OptionMenu.DELETE)
+    }
+    if (canRename()) {
+        menus.add(OptionMenu.RENAME)
+    }
+    if (this is ExplorerSampleItem) {
+        menus.add(OptionMenu.RESET_TO_INITIAL_CONTENT)
+    }
+    return menus
+}
+
 @Composable
 fun ExplorerViewKt.OptionMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    explorerItem: ExplorerItem,
+    menus: List<OptionMenu>,
     onMenuSelect: (OptionMenu) -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
-        val menus = OptionMenu.entries.toMutableSet()
-        explorerItem.let {
-            Log.i("ExplorerViewKt", "OptionMenu: ${it.isEditable}")
-            if (!it.isExecutable) {
-                menus.remove(OptionMenu.RUN_REPEATEDLY)
-                menus.remove(OptionMenu.TIMED_TASK)
-                menus.remove(OptionMenu.CREATE_SHORTCUT)
-                menus.remove(OptionMenu.OPEN_BY_OTHER_APPS)
-                menus.remove(OptionMenu.BUILD_APK)
-            }
-            if (!it.canDelete()) {
-                menus.remove(OptionMenu.DELETE)
-            }
-            if (!it.canRename()) {
-                menus.remove(OptionMenu.RENAME)
-            }
-            if (it !is ExplorerSampleItem) {
-                menus.remove(OptionMenu.RESET_TO_INITIAL_CONTENT)
-            }
-        }
         menus.forEach {
             DropdownMenuItem(
                 text = { Text(text = stringResource(it.resId)) },
@@ -55,8 +55,8 @@ fun ExplorerViewKt.OptionMenu(
 fun OptionMenu2(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    menus: List<OptionMenu>,
-    onMenuSelect: (OptionMenu) -> Unit
+    menus: List<OptionMenu2>,
+    onMenuSelect: (OptionMenu2) -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
@@ -83,6 +83,9 @@ enum class OptionMenu(val resId: Int) {
     OPEN_BY_OTHER_APPS(R.string.text_open_by_other_apps),
     BUILD_APK(R.string.text_build_apk),
 
+}
+
+enum class OptionMenu2(val resId: Int) {
     NAME(R.string.text_name),
     TIME(R.string.text_time),
     SIZE(R.string.text_size),

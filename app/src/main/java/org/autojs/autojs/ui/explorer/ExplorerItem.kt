@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,7 +74,7 @@ fun ExplorerItem(
     item: ExplorerViewKt.ExplorerItemViewHolder,
     optionMenuContent: @Composable () -> Unit,
 ) {
-
+    val config = LocalExplorerItemConfig.current
     Row(
         Modifier
             .fillMaxWidth()
@@ -91,7 +92,7 @@ fun ExplorerItem(
                 .width(35.dp)
                 .clip(RoundedCornerShape(32.dp))
             val iconModifier = Modifier.size(18.dp)
-            if (item.runVisibility) Box(
+            if (item.runVisibility && config.showRun) Box(
                 modifier.clickable { item.run() },
                 contentAlignment = Alignment.Center
             ) {
@@ -102,7 +103,7 @@ fun ExplorerItem(
                     tint = tint
                 )
             }
-            if (item.editVisibility) Box(
+            if (item.editVisibility && config.showEdit) Box(
                 modifier.clickable { item.edit() },
                 contentAlignment = Alignment.Center
             ) {
@@ -113,7 +114,7 @@ fun ExplorerItem(
                     tint = tint
                 )
             }
-            Box(
+            if (config.showMore) Box(
                 modifier.clickable { item.showMenu = true },
                 contentAlignment = Alignment.Center
             ) {
@@ -216,3 +217,12 @@ fun CategoryItem(holder: ExplorerViewKt.CategoryViewHolder, options: @Composable
         }
     }
 }
+
+
+data class ExplorerItemConfig(
+    val showRun: Boolean = true,
+    val showEdit: Boolean = true,
+    val showMore: Boolean = true
+)
+
+val LocalExplorerItemConfig = staticCompositionLocalOf { ExplorerItemConfig() }

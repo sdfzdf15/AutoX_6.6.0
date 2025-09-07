@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -54,7 +55,9 @@ import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.tool.AccessibilityServiceTool
 import org.autojs.autojs.tool.RootTool
+import org.autojs.autojs.ui.explorer.ExplorerItemConfig
 import org.autojs.autojs.ui.explorer.ExplorerViewKt
+import org.autojs.autojs.ui.explorer.LocalExplorerItemConfig
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.main.MainActivity
@@ -155,7 +158,15 @@ class CircularMenu(context: Context?) : Recorder.OnStateChangedListener, Capture
                     negativeText = stringResource(R.string.cancel),
                     onNegativeClick = { dismiss() }
                 ) {
-                    AndroidView(factory = { explorerView })
+                    CompositionLocalProvider(
+                        LocalExplorerItemConfig provides ExplorerItemConfig(
+                            showRun = false,
+                            showEdit = false,
+                            showMore = false
+                        )
+                    ) {
+                        AndroidView(factory = { explorerView })
+                    }
                 }
             }
             setCancelable(false)
@@ -165,7 +176,10 @@ class CircularMenu(context: Context?) : Recorder.OnStateChangedListener, Capture
         }
         explorerView.setOnItemClickListener { _, item ->
             Log.d(TAG, "onItemClick: ${item?.path}")
-            item?.let { Scripts.run(item.toScriptFile()) }
+            if (item?.isExecutable != true)
+                toast(mContext, "${item?.name} ${mContext.getString(R.string.text_is_not_executable)}")
+            else
+                Scripts.run(item.toScriptFile())
         }
         DialogUtils.showDialog(dialog)
     }

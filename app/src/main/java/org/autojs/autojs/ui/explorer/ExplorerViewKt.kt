@@ -386,12 +386,12 @@ open class ExplorerViewKt : FrameLayout, ViewTreeObserver.OnGlobalFocusChangeLis
         }
     }
 
-    fun onMenuSelect(optionMenu: OptionMenu) {
+    fun onMenuSelect(optionMenu: OptionMenu2) {
         when (optionMenu) {
-            OptionMenu.NAME -> sort(ExplorerItemList.SORT_TYPE_NAME, dirSortMenuShowing)
-            OptionMenu.TIME -> sort(ExplorerItemList.SORT_TYPE_DATE, dirSortMenuShowing)
-            OptionMenu.SIZE -> sort(ExplorerItemList.SORT_TYPE_SIZE, dirSortMenuShowing)
-            OptionMenu.TYPE -> sort(ExplorerItemList.SORT_TYPE_TYPE, dirSortMenuShowing)
+            OptionMenu2.NAME -> sort(ExplorerItemList.SORT_TYPE_NAME, dirSortMenuShowing)
+            OptionMenu2.TIME -> sort(ExplorerItemList.SORT_TYPE_DATE, dirSortMenuShowing)
+            OptionMenu2.SIZE -> sort(ExplorerItemList.SORT_TYPE_SIZE, dirSortMenuShowing)
+            OptionMenu2.TYPE -> sort(ExplorerItemList.SORT_TYPE_TYPE, dirSortMenuShowing)
             else -> {}
         }
     }
@@ -522,7 +522,7 @@ open class ExplorerViewKt : FrameLayout, ViewTreeObserver.OnGlobalFocusChangeLis
                         OptionMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
-                            it
+                            it.createOptionMenu()
                         ) { showMenu = false; onMenuSelect(it, explorerItem!!) }
                     }
                 }
@@ -566,6 +566,7 @@ open class ExplorerViewKt : FrameLayout, ViewTreeObserver.OnGlobalFocusChangeLis
 
         init {
             view.setContent {
+                val config = LocalExplorerItemConfig.current
                 ElevatedCard(
                     onClick = { onItemClick() },
                     modifier = Modifier
@@ -591,13 +592,15 @@ open class ExplorerViewKt : FrameLayout, ViewTreeObserver.OnGlobalFocusChangeLis
                             )
                         } else {
                             var show by remember { mutableStateOf(false) }
-                            if (!optionsVisibility) IconButton(onClick = { show = true }) {
+                            if (!optionsVisibility && config.showMore) IconButton(onClick = {
+                                show = true
+                            }) {
                                 Icon(
                                     modifier = Modifier.size(24.dp),
                                     painter = painterResource(R.drawable.ic_more_vert_black_24dp),
                                     contentDescription = null
                                 )
-                                OptionMenu2(
+                                OptionMenu(
                                     expanded = show,
                                     onDismissRequest = { show = false },
                                     listOf(OptionMenu.RENAME, OptionMenu.DELETE)
@@ -637,7 +640,7 @@ open class ExplorerViewKt : FrameLayout, ViewTreeObserver.OnGlobalFocusChangeLis
                     OptionMenu2(
                         expanded = showMenu, onDismissRequest = { showMenu = false },
                         listOf(
-                            OptionMenu.NAME, OptionMenu.TIME, OptionMenu.SIZE, OptionMenu.TIME
+                            OptionMenu2.NAME, OptionMenu2.TIME, OptionMenu2.SIZE, OptionMenu2.TIME
                         )
                     ) {
                         showMenu = false
