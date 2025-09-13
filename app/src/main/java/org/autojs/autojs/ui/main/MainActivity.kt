@@ -166,7 +166,7 @@ fun MainPage(
                 openMenuRequest = { scope.launch { drawerState.open() } }
             ) {
                 if (currentPage == 2)
-                    DocumentPageMenuButton { webViewFragment.swipeRefreshWebView.webView }
+                    DocumentPageMenuButton { webViewFragment.webView }
             }
         },
         bottomBar = {

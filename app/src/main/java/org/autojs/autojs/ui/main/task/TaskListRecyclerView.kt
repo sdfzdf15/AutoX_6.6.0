@@ -1,14 +1,35 @@
 package org.autojs.autojs.ui.main.task
 
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder
@@ -32,6 +53,8 @@ import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TimedTask
 import org.autojs.autojs.timing.TimedTaskManager.intentTaskChanges
 import org.autojs.autojs.timing.TimedTaskManager.timeTaskChanges
+import org.autojs.autojs.ui.explorer.FileIcon
+import org.autojs.autojs.ui.explorer.FileInfo
 import org.autojs.autojs.ui.main.task.Task.PendingTask
 import org.autojs.autojs.ui.main.task.TaskGroup.PendingTaskGroup
 import org.autojs.autojs.ui.main.task.TaskGroup.RunningTaskGroup
@@ -159,17 +182,11 @@ class TaskListRecyclerView : RecyclerView {
             parentViewGroup: ViewGroup,
             viewType: Int
         ): TaskGroupViewHolder {
-            return TaskGroupViewHolder(
-                LayoutInflater.from(parentViewGroup.context)
-                    .inflate(R.layout.dialog_code_generate_option_group, parentViewGroup, false)
-            )
+            return TaskGroupViewHolder(ComposeView(context))
         }
 
         override fun onCreateChildViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-            return TaskViewHolder(
-                LayoutInflater.from(context)
-                    .inflate(R.layout.task_list_recycler_view_item, parent, false)
-            )
+            return TaskViewHolder(ComposeView(context))
         }
 
         override fun onBindParentViewHolder(
@@ -177,7 +194,7 @@ class TaskListRecyclerView : RecyclerView {
             parentPosition: Int,
             taskGroup: TaskGroup
         ) {
-            viewHolder.title.text = taskGroup.title
+            viewHolder.title = taskGroup.title
         }
 
         override fun onBindChildViewHolder(
@@ -190,29 +207,29 @@ class TaskListRecyclerView : RecyclerView {
         }
     }
 
-    internal inner class TaskViewHolder(itemView: View) : ChildViewHolder<Task?>(itemView) {
-        private val mFirstChar: TextView = itemView.findViewById(R.id.first_char)
-        private val mName: TextView = itemView.findViewById(R.id.name)
-        private val mDesc: TextView = itemView.findViewById(R.id.desc)
+    internal inner class TaskViewHolder(itemView: ComposeView) : ChildViewHolder<Task?>(itemView) {
+        var firstChar by mutableStateOf("J")
+        var name by mutableStateOf("J")
+        var desc by mutableStateOf("J")
         private var mTask: TaskInfo? = null
-        private val mFirstCharBackground: GradientDrawable =
-            mFirstChar.background as GradientDrawable
+        var firstCharBackground by mutableStateOf(Color(0xFF2196F3))
 
         init {
-            itemView.setOnClickListener { view: View? -> onItemClick(view) }
-            itemView.findViewById<View>(R.id.stop).setOnClickListener { stop() }
+            itemView.setContent {
+                TaskItem(this)
+            }
         }
 
         fun bind(task: TaskInfo) {
             mTask = task
-            mName.text = task.name
-            mDesc.text = task.desc
+            name = task.name
+            desc = task.desc
             if (AutoFileSource.ENGINE == mTask!!.engineName) {
-                mFirstChar.text = "R"
-                mFirstCharBackground.setColor(context.getColor(R.color.color_r))
+                firstChar = "R"
+                firstCharBackground = Color(0xFFFD999A)
             } else {
-                mFirstChar.text = "J"
-                mFirstCharBackground.setColor(context.getColor(R.color.color_j))
+                firstChar = "J"
+                firstCharBackground = Color(0xFF99CC99)
             }
         }
 
@@ -224,34 +241,92 @@ class TaskListRecyclerView : RecyclerView {
                 EngineController.stopScript(task.id)
         }
 
-        private fun onItemClick(view: View?) {
+        fun onItemClick() {
             if (mTask is PendingTask) {
                 TimedTaskSettingActivity.reviseTimeTask(context, mTask as PendingTask)
             }
         }
     }
 
-    private inner class TaskGroupViewHolder(itemView: View) :
+    private inner class TaskGroupViewHolder(itemView: ComposeView) :
         ParentViewHolder<TaskGroup?, TaskInfo>(itemView) {
-        val title: TextView = itemView.findViewById(R.id.title)
-        val icon: ImageView = itemView.findViewById(R.id.icon)
+        var title by mutableStateOf("")
+        private var exp by mutableStateOf(isExpanded)
 
         init {
-            itemView.setOnClickListener {
-                if (isExpanded) {
-                    collapseView()
-                } else {
-                    expandView()
+            itemView.setContent {
+                TaskGroup(title, exp) {
+                    if (isExpanded) {
+                        collapseView()
+                    } else {
+                        expandView()
+                    }
                 }
             }
         }
 
         override fun onExpansionToggled(expanded: Boolean) {
-            icon.rotation = (if (expanded) -90 else 0).toFloat()
+            exp = expanded
         }
     }
 
     companion object {
         private const val LOG_TAG = "TaskListRecyclerView"
+    }
+}
+
+@Composable
+fun TaskGroup(title: String, expanded: Boolean, onClick: () -> Unit) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick() }) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val rotation by animateFloatAsState(if (expanded) -90f else 0f)
+            Icon(
+                modifier = Modifier.rotate(rotation),
+                imageVector = Icons.Outlined.KeyboardArrowDown,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun TaskItem(
+    item: TaskListRecyclerView.TaskViewHolder,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 9.dp)
+            .clickable { item.onItemClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FileIcon(item.firstChar, item.firstCharBackground)
+        Spacer(Modifier.width(16.dp))
+        FileInfo(modifier = Modifier.weight(1f), name = item.name, desc = item.desc)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val tint = Color(0xFFA9AAAB)
+            val iconModifier = Modifier.size(24.dp)
+
+            IconButton(
+                onClick = { item.stop() }
+            ) {
+                Icon(
+                    modifier = iconModifier,
+                    painter = painterResource(R.drawable.ic_close_gray600_48dp),
+                    contentDescription = null,
+                    tint = tint
+                )
+            }
+        }
     }
 }

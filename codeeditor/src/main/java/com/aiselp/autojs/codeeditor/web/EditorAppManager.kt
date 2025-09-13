@@ -142,10 +142,10 @@ class EditorAppManager(val context: Activity, val editorModel: EditActivity.Edit
     private fun isUpdate(file: File): Boolean {
         if (!file.isFile) return false
         return try {
-            val text = file.readText().toLong()
+            val text = file.readText()
             val versionCode = context.assets.open(VERSION_FILE).use { it.readBytes() }
-            String(versionCode).toLong() == text
-        } catch (e: Exception) {
+            String(versionCode) == text
+        } catch (_: Exception) {
             false
         }
     }

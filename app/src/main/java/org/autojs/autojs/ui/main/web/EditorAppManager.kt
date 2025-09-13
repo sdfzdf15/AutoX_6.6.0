@@ -3,21 +3,39 @@ package org.autojs.autojs.ui.main.web
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
-import android.widget.Toast
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.edit
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.fragment.app.Fragment
+import com.aiselp.autox.utils.dataStore
+import com.stardust.toast
 import com.stardust.util.IntentUtil
-import org.autojs.autojs.ui.widget.SwipeRefreshWebView
-import org.autojs.autojs.ui.widget.fillMaxSize
+import kotlinx.coroutines.flow.first
 
 class EditorAppManager : Fragment() {
-
-    val swipeRefreshWebView by lazy {
-        val context = requireContext()
-        SwipeRefreshWebView(context)
+    val webView by lazy {
+        object : WebView(requireContext()) {
+            override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+                if (event.keyCode == KeyEvent.KEYCODE_BACK &&
+                    event.action == KeyEvent.ACTION_UP &&
+                    canGoBack()
+                ) {
+                    goBack()
+                    return true
+                } else
+                    return super.dispatchKeyEvent(event)
+            }
+        }
     }
 
     override fun onCreateView(
@@ -25,15 +43,36 @@ class EditorAppManager : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return swipeRefreshWebView.apply {
-            loadHomeDocument(this.webView)
-            fillMaxSize()
+        val composeView = ComposeView(requireContext())
+        composeView.setContent { Page() }
+        return composeView
+    }
+
+    suspend fun setup(webView: WebView) {
+        webView.webViewClient = WebViewClient(webView.context, DocumentSource.DOC_V2_LOCAL.uri)
+        webView.settings.apply {
+            javaScriptEnabled = true  //设置支持Javascript交互
+            domStorageEnabled = true
+            databaseEnabled = true   //开启 database storage API 功能
         }
+        loadSavedPage(webView)
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun Page() {
+        LaunchedEffect(webView) {
+            setup(webView)
+        }
+        AndroidView(factory = {
+            webView
+        })
     }
 
     companion object {
         const val TAG = "EditorAppManager"
         const val DocumentSourceKEY = "DocumentSource"
+        val savedUri = stringPreferencesKey("DocumentSavedUri")
 
         private var saveStatus: SharedPreferences? = null
 
@@ -46,15 +85,22 @@ class EditorAppManager : Fragment() {
         }
 
         fun loadHomeDocument(webView: WebView) {
-            val saveStatus = getSaveStatus(webView.context)
-            val name = saveStatus.getString(DocumentSourceKEY, DocumentSource.DOC_V2_LOCAL.name)
-            switchDocument(
-                webView, try {
-                    DocumentSource.valueOf(name!!)
-                } catch (e: Exception) {
-                    DocumentSource.DOC_V2_LOCAL
-                }
-            )
+            webView.loadUrl("https://appassets.androidplatform.net")
+        }
+
+        suspend fun loadSavedPage(webView: WebView) {
+            val first = webView.context.dataStore.data.first()
+            val uri = first[savedUri]
+            if (uri != null) {
+                webView.loadUrl(uri)
+            } else loadHomeDocument(webView)
+        }
+
+        suspend fun saveCurrentPage(webView: WebView) {
+            val uri = webView.url
+            webView.context.dataStore.edit {
+                if (uri != null) it[savedUri] = uri
+            }
         }
 
         fun openDocument(context: Context) {
@@ -69,7 +115,7 @@ class EditorAppManager : Fragment() {
             if (uri != null) {
                 IntentUtil.browse(context, uri)
             } else {
-                Toast.makeText(context, "此文档未提供在线uri", Toast.LENGTH_SHORT).show()
+                toast(context, "此文档未提供在线uri")
             }
         }
 
@@ -79,9 +125,9 @@ class EditorAppManager : Fragment() {
                 webView.loadUrl("https://appassets.androidplatform.net")
             } else
                 webView.loadUrl(documentSource.uri)
-            getSaveStatus(webView.context).edit()
-                .putString(DocumentSourceKEY, documentSource.name)
-                .apply()
+            getSaveStatus(webView.context).edit {
+                putString(DocumentSourceKEY, documentSource.name)
+            }
         }
     }
 }

@@ -4,9 +4,10 @@ import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -16,41 +17,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.autojs.autojs.ui.log.LogActivityKt
-import org.autojs.autojs.ui.main.web.DocumentSourceSelectDialog
+import com.stardust.toast
+import kotlinx.coroutines.launch
+import org.autojs.autojs.ui.main.web.EditorAppManager
 import org.autojs.autojs.ui.main.web.EditorAppManager.Companion.loadHomeDocument
 import org.autojs.autojs.ui.main.web.EditorAppManager.Companion.openDocument
 import org.autojs.autoxjs.R
 
-//主界面日志按钮
-@Composable
-fun LogButton() {
-    val context = LocalContext.current
-    IconButton(onClick = { LogActivityKt.start(context) }) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_logcat),
-            contentDescription = stringResource(id = R.string.text_logcat)
-        )
-    }
-}
 
 //文档界面菜单按钮
 @Composable
 fun DocumentPageMenuButton(getWebView: () -> WebView) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     Box {
         var expanded by remember { mutableStateOf(false) }
         fun dismissMenu() {
             expanded = false
         }
         IconButton({ expanded = true }) {
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+            Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = null)
         }
         val iconModifier = Modifier.size(24.dp)
         DropdownMenu(
@@ -61,7 +54,7 @@ fun DocumentPageMenuButton(getWebView: () -> WebView) {
                 leadingIcon = {
                     Icon(
                         modifier = iconModifier,
-                        imageVector = Icons.Default.Home,
+                        imageVector = Icons.Outlined.Home,
                         contentDescription = null
                     )
                 },
@@ -87,7 +80,7 @@ fun DocumentPageMenuButton(getWebView: () -> WebView) {
                 text = { Text(text = "刷新") },
                 leadingIcon = {
                     Icon(
-                        Icons.Default.Refresh,
+                        Icons.Outlined.Refresh,
                         modifier = iconModifier,
                         contentDescription = null
                     )
@@ -98,17 +91,20 @@ fun DocumentPageMenuButton(getWebView: () -> WebView) {
                     getWebView().reload()
                 })
             DropdownMenuItem(
-                text = { Text(text = "选择文档源") },
+                text = { Text(text = "设为首页") },
                 leadingIcon = {
                     Icon(
-                        painterResource(id = R.drawable.community_list),
+                        imageVector = Icons.Outlined.FavoriteBorder,
                         modifier = iconModifier,
                         contentDescription = null
                     )
                 },
                 onClick = {
                     dismissMenu()
-                    DocumentSourceSelectDialog(getWebView()).show()
+                    scope.launch {
+                        EditorAppManager.saveCurrentPage(getWebView())
+                        toast(context, "已设置当前页面为首页")
+                    }
                 })
         }
     }

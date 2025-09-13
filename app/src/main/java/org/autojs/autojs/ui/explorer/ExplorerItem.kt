@@ -33,7 +33,7 @@ import org.autojs.autojs.ui.filechooser.FileChooseListView
 import org.autojs.autoxjs.R
 
 @Composable
-private fun FileIcon(text: String, background: Color) {
+fun FileIcon(text: String, background: Color) {
     Box(
         modifier = Modifier
             .size(40.dp)
