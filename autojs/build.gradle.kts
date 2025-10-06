@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.support.listFilesOrdered
-
 plugins {
     id("com.android.library")
     id("kotlin-android")
@@ -54,7 +52,7 @@ dependencies {
     androidTestImplementation(libs.test.runner)
     androidTestImplementation(libs.test.rules)
     debugImplementation(libs.leakcanary.android)
-    implementation(libs.leakcanary.`object`.watcher.android)
+    implementation(libs.leakcanary.robject.watcher.android)
     testImplementation(libs.junit)
 
     implementation(libs.coil.compose)
@@ -87,7 +85,7 @@ dependencies {
     api(libs.mozilla.rhino.tools)
     implementation(libs.opencv)
     // libs
-    api(fileTree("./libs") { include("dx.jar") })
+    implementation(libs.byte.buddy.android)
     implementation("cz.adaptech:tesseract4android:4.1.1")
     implementation(libs.bundles.mlkit)
 }

@@ -6,7 +6,6 @@ import com.caoccao.javet.interop.callback.JavetCallbackContext
 import com.caoccao.javet.values.reference.V8ValueObject
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
-import kotlin.reflect.jvm.javaMethod
 
 class JsDebug : NativeApi {
     override val moduleId: String = "debug"
@@ -15,7 +14,8 @@ class JsDebug : NativeApi {
         global: V8ValueObject
     ): NativeApi.BindingMode {
         v8Runtime.createV8ValueObject().use { debug ->
-            val javetCallbackContext = JavetCallbackContext("test", this, ::test.javaMethod)
+            val javetCallbackContext = JavetCallbackContext("test", this,
+                JsDebug::class.java.getMethod("test"))
             v8Runtime.createV8ValueFunction(javetCallbackContext).use {
                 debug.set("test", it)
             }

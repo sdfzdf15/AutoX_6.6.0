@@ -74,6 +74,8 @@ opencv = "org.opencv:opencv:4.12.0"
 # commons
 commons-exec = "org.apache.commons:commons-exec:1.5.0"
 commons-io = "commons-io:commons-io:2.6"
+# byte-buddy-android
+byte-buddy-android = "net.bytebuddy:byte-buddy-android:1.15.11"
 
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
 google-gson = { module = "com.google.code.gson:gson", version.ref = "google-gson" }
@@ -110,7 +112,7 @@ junit = { module = "junit:junit", version.ref = "junit" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junit-ktx" }
 #leakcanary
 leakcanary-android = "com.squareup.leakcanary:leakcanary-android:2.14"
-leakcanary-object-watcher-android = "com.squareup.leakcanary:leakcanary-object-watcher-android:2.14"
+leakcanary-robject-watcher-android = "com.squareup.leakcanary:leakcanary-object-watcher-android:2.14"
 retrofit2-retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
 retrofit2-converter-gson = "com.squareup.retrofit2:converter-gson:2.9.0"
 test-runner = "androidx.test:runner:1.6.2"
