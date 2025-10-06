@@ -6,6 +6,7 @@ import com.aiselp.autox.api.JavaInteractor
 import com.aiselp.autox.api.JsAccessibility
 import com.aiselp.autox.api.JsApp
 import com.aiselp.autox.api.JsClipManager
+import com.aiselp.autox.api.JsDebug
 import com.aiselp.autox.api.JsDialogs
 import com.aiselp.autox.api.JsEngines
 import com.aiselp.autox.api.JsMedia
@@ -47,7 +48,7 @@ class NodeScriptEngine(val context: Context) :
 
     private val tags = mutableMapOf<String, Any?>()
     private val v8Locker = run {
-        runtime.v8Locker
+        //runtime.v8Locker
         ReentrantLock()
     }
     private val config: ExecutionConfig by lazy {
@@ -57,7 +58,11 @@ class NodeScriptEngine(val context: Context) :
     private val resultListener = PromiseListener()
     private val console = NodeConsole(context)
     private val nativeApiManager = NativeApiManager(this)
-    val converter = JavetProxyConverter()
+    val converter = JavetProxyConverter().apply {
+        config.setProxyMapEnabled(true)
+        config.setProxySetEnabled(true)
+        config.setProxyListEnabled(true)
+    }
     val scope = CoroutineScope(Dispatchers.Default)
     val eventLoopQueue = EventLoopQueue(runtime)
     val promiseFactory = V8PromiseFactory(runtime, eventLoopQueue)
@@ -130,6 +135,7 @@ class NodeScriptEngine(val context: Context) :
         nativeApiManager.register(JsEngines(this))
         nativeApiManager.register(JsApp(context))
         nativeApiManager.register(JsAccessibility(builder))
+        nativeApiManager.register(JsDebug())
         nativeApiManager.initialize(runtime, global)
     }
 

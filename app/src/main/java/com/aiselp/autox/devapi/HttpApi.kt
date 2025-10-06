@@ -20,6 +20,7 @@ import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.autojs.autoxjs.BuildConfig
 import java.io.File
 
 class HttpApi(val context: PipelineContext<Unit, ApplicationCall>) {
@@ -57,6 +58,20 @@ class HttpApi(val context: PipelineContext<Unit, ApplicationCall>) {
         call.respond(HttpStatusCode.OK)
     }
 
+    private suspend fun runScript(call: ApplicationCall) {
+        val name = call.parameters["scriptName"] ?: "test.js"
+        withContext(Dispatchers.IO) {
+            val file = File.createTempFile("e", "-$name")
+            call.receiveStream().use {
+                file.outputStream().use { out ->
+                    it.copyTo(out)
+                }
+            }
+            EngineController.runScript(file)
+        }
+        call.respond(HttpStatusCode.OK)
+    }
+
     private suspend fun saveProject(call: ApplicationCall) {
         val dirName = call.parameters["dirName"]!!
         val saveName = call.parameters["saveName"]!!
@@ -68,8 +83,8 @@ class HttpApi(val context: PipelineContext<Unit, ApplicationCall>) {
             val scriptDirPath = org.autojs.autojs.Pref.getScriptDirPath()
             val saveDir = File(scriptDirPath, saveName)
             PFiles.deleteRecursively(saveDir)
-            PFiles.copyDirectory(project.toPath(),saveDir.toPath())
-            Log.i(TAG,"save project to $saveDir")
+            PFiles.copyDirectory(project.toPath(), saveDir.toPath())
+            Log.i(TAG, "save project to $saveDir")
         }
         call.respond(HttpStatusCode.OK)
     }
@@ -77,6 +92,8 @@ class HttpApi(val context: PipelineContext<Unit, ApplicationCall>) {
     private suspend fun respondIp(call: ApplicationCall) {
         val data = gson.toJson(object {
             val remoteHost = context.call.mutableOriginConnectionPoint.remoteHost
+            val version = BuildConfig.VERSION_NAME
+            val versionCode = BuildConfig.VERSION_CODE
         })
         call.respondText(data, ContentType.Text.Plain, HttpStatusCode.OK)
     }

@@ -101,6 +101,7 @@ android {
     flavorDimensions.add("channel")
     productFlavors {
         create("common") {
+            applicationIdSuffix = ".common"
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
             buildConfigField("String", "CHANNEL", "\"common\"")

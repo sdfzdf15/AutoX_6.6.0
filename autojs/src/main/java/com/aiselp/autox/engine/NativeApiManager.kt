@@ -49,6 +49,7 @@ class NativeApiManager(engine: NodeScriptEngine) {
                                 global.set(api.moduleId, apiObject)
                             }
                         }
+
                     else -> {}
                 }
             }
@@ -93,7 +94,7 @@ class NativeApiManager(engine: NodeScriptEngine) {
     }
 
     companion object {
-        private const val INSTANCE_NAME = "Autox"
+        const val INSTANCE_NAME = "Autox"
         private val DEFINE_PROPERTY = """
             (obj, name, value) => {
                 Object.defineProperty(obj, name, {
