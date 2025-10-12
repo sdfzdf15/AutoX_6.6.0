@@ -1,0 +1,84 @@
+name: 🐛 Bug 报告
+description: 报告一个错误或问题
+title: "[Bug] "
+labels: ["bug", "等待调查"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您花时间填写错误报告！请详细描述遇到的问题，这将帮助我们更快地定位和解决问题。
+
+  - type: dropdown
+    id: error-type
+    attributes:
+      label: 错误类型
+      options:
+        - app相关
+        - Rhino引擎及api
+        - nodejs引擎及api
+    validations:
+      required: true
+      
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: 问题描述
+      description: 请详细描述您遇到的问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment-details
+    attributes:
+      label: 环境详细信息
+      description: 请提供运行环境相关信息
+      value: |
+        - app版本：v7.x.x
+        - 安卓版本：9 / 11 / 15
+        - 定制os类型：MUUI / 澎湃OS / OriginOS
+        - cup平台类型：arm64-v8a / x86-64
+        - 其他相关信息...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 复现步骤或代码
+      description: 请描述如何复现这个问题
+      placeholder: |
+        简要复现代码：
+        ```js
+        console.show()
+        //....
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志
+      description: |
+        请提供相关的错误日志、控制台输出或应用崩溃界面的日志信息
+      render: text
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图或录屏
+      description: |
+        如果适用，请添加截图或录屏来帮助解释您的问题
+        您可以直接拖拽图片到这个文本框中
+      placeholder: 拖拽图片文件到这里，或者粘贴图片链接
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 其他信息
+      description: 任何其他可能有助于解决问题的信息
+      placeholder: |
+        - 问题发生的频率：每次 / 偶尔 / 特定条件下
+        - 是否在多个设备上都出现
+        - 最近是否有环境变化
+        - 其他可能相关的信息...

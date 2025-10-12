@@ -1,0 +1,62 @@
+name: ✨ 功能请求
+description: 建议一个新功能或改进
+title: "[Feature] "
+labels: ["enhancement", "功能请求"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您提出功能建议！您的想法对改进项目非常重要。请详细描述您的建议。
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: 类型
+      options:
+        - app相关
+        - Rhino引擎及api
+        - nodejs引擎及api
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 建议功能
+      description: 请清楚简洁地描述您希望实现的功能
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 需求原因
+      description: 请解释为什么需要这个功能，它解决了什么问题？
+
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      description: 您认为这个功能的优先级如何？
+      options:
+        - 低（Nice to have）
+        - 中（重要但不紧急）
+        - 高（对用户体验很重要）
+        - 关键（阻碍正常使用）
+    validations:
+      required: true
+
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 其他信息
+      description: 任何其他可能有助于理解和实现这个功能的信息
+      placeholder: |
+        - 类似功能的参考应用或网站
+        - 相关技术文档或标准
+        - 社区讨论链接
+        - 其他补充说明

@@ -1,0 +1,43 @@
+name: 💬 问题咨询
+description: 使用问题、配置疑问或一般性讨论
+title: "[Question] "
+labels: ["question", "需要回复"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        如果您有使用问题、配置疑问或想要讨论项目相关话题，请使用这个模板。
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: 问题类型
+      description: 请选择您的问题类型
+      options:
+        - 使用问题（如何使用某个功能）
+        - 配置问题（安装和设置相关）
+        - 技术咨询（技术实现相关）
+        - 功能理解（不确定某个功能如何工作）
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 具体问题
+      description: 请详细描述您的问题
+      placeholder: |
+        例如：我想实现某个功能，但不确定使用哪个api，或者遇到了什么问题。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认事项
+      options:
+        - label: 我已经查看了项目文档和README
+          required: true
+        - label: 我已经搜索了现有的Issues
+          required: true
