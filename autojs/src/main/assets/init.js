@@ -78,11 +78,6 @@ runtime.init();
 
     require("/android_asset/v6modules/init.js")
 
-    //重定向require以便支持相对路径和npm模块
-    Module = require("jvm-npm.js");
-    require = Module.require;
-
-
 })();
 
 

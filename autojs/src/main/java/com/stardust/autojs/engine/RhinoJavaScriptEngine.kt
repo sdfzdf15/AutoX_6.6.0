@@ -12,6 +12,7 @@ import com.stardust.autojs.rhino.AutoJsContext
 import com.stardust.autojs.rhino.RhinoAndroidHelper
 import com.stardust.autojs.rhino.TopLevelScope
 import com.stardust.autojs.runtime.ScriptRuntime
+import com.stardust.autojs.script.JavaScriptFileSource
 import com.stardust.autojs.script.JavaScriptSource
 import com.stardust.pio.UncheckedIOException
 import org.mozilla.javascript.Context
@@ -44,6 +45,7 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             throw UncheckedIOException(e)
         }
     }
+    lateinit var require: ScopeRequire
 
     val scriptable: Scriptable
         get() = mScriptable
@@ -63,6 +65,13 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
     }
 
     public override fun doExecution(source: JavaScriptSource): Any? {
+        if (source is JavaScriptFileSource) {
+            require.mainModuleId = source.file.path
+        } else {
+            if (cwd() != null) {
+                require.mainModuleId = cwd() + "/" + source.name
+            }
+        }
         val reader = source.nonNullScriptReader
         try {
             val script = context.compileReader(reader, source.toString(), 1, null)
@@ -119,7 +128,7 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
                 AssetAndUrlModuleSourceProvider.NPM_MODULE_DIR
             )
         )
-        val require = ScopeRequire(
+        require = ScopeRequire(
             context, scope, SoftCachingModuleScriptProvider(provider),
             null, null, false
         )
