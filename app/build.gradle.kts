@@ -67,6 +67,9 @@ android {
             val bytes = Base64.getDecoder().decode(System.getenv("KEYSTORE_BASE64"))
             file.writeBytes(bytes)
             signingConfigs.create("release") {
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
                 storeFile = file
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")

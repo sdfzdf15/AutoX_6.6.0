@@ -99,6 +99,10 @@ class NodeScriptEngine(val context: Context) :
         console.error(e.stackTraceToString())
     }
 
+    fun getSource(): ScriptSource? {
+        return getTag(ScriptEngine.Companion.TAG_SOURCE) as ScriptSource?
+    }
+
     override fun init() {
         runtime.converter = converter
         runtime.allowEval(true)
