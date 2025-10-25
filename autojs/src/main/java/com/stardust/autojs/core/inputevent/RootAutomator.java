@@ -7,7 +7,7 @@ import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.ViewConfiguration;
 
-import com.stardust.autojs.core.util.Shell;
+import com.stardust.autojs.core.util.Shell2;
 import com.stardust.autojs.engine.RootAutomatorEngine;
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
 import com.stardust.util.ScreenMetrics;
@@ -22,7 +22,7 @@ import static com.stardust.autojs.core.inputevent.InputEventCodes.*;
  * Created by Stardust on 2017/7/16.
  */
 
-public class RootAutomator implements Shell.Callback {
+public class RootAutomator implements Shell2.Callback {
 
     private static final String LOG_TAG = "RootAutomator";
 
@@ -34,7 +34,7 @@ public class RootAutomator implements Shell.Callback {
 
     @Nullable
     private ScreenMetrics mScreenMetrics;
-    private Shell mShell;
+    private Shell2 mShell;
     private int mDefaultId = 0;
     private AtomicInteger mTracingId = new AtomicInteger(1);
     private SparseIntArray mSlotIdMap = new SparseIntArray();
@@ -50,7 +50,7 @@ public class RootAutomator implements Shell.Callback {
         } else {
             mInputDevice = inputDevice;
         }
-        mShell = new Shell(true);
+        mShell = new Shell2("su");
         mShell.setCallback(this);
         if (waitForReady) {
             waitForReady();
@@ -299,11 +299,6 @@ public class RootAutomator implements Shell.Callback {
             mReady = true;
             mReadyLock.notifyAll();
         }
-    }
-
-    @Override
-    public void onInterrupted(InterruptedException e) {
-
     }
 }
 

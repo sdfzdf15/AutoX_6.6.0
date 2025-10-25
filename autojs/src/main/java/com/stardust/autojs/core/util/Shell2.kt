@@ -21,7 +21,7 @@ import com.jaredrummler.ktsh.Shell as Ktsh
 
 class Shell2(initCommand: String) : Closeable {
     private val sh = Ktsh(initCommand)
-    private var callback: Shell.Callback? = null
+    private var callback: Callback? = null
     private var pid: Int? = null
     private val executor = Executors.newSingleThreadExecutor()
     private val scope = CoroutineScope(executor.asCoroutineDispatcher())
@@ -31,6 +31,7 @@ class Shell2(initCommand: String) : Closeable {
                 pid = line.replace(PidSuffix, "").toInt()
                 Log.d(TAG, "create shell pid: $pid")
                 initStatus.complete()
+                callback?.onInitialized()
                 return
             }
             callback?.onOutput(line)
@@ -98,7 +99,7 @@ class Shell2(initCommand: String) : Closeable {
     }
 
     @ScriptInterface
-    fun setCallback(callback: Shell.Callback) {
+    fun setCallback(callback: Callback) {
         this.callback = callback
     }
 
@@ -112,6 +113,12 @@ class Shell2(initCommand: String) : Closeable {
         if (!executor.isShutdown) {
             executor.shutdownNow()
         }
+    }
+
+    interface Callback {
+        fun onOutput(str: String?)
+        fun onNewLine(line: String?)
+        fun onInitialized()
     }
 
     companion object {

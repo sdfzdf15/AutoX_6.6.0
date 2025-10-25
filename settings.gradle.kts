@@ -4,8 +4,5 @@ plugins {
 }
 
 include(":app", ":automator", ":common", ":autojs", ":inrt", ":apkbuilder")
-include(":LocalRepo:libtermexec")
-include(":LocalRepo:emulatorview")
-include(":LocalRepo:term")
 include(":paddleocr")
 include(":codeeditor")
