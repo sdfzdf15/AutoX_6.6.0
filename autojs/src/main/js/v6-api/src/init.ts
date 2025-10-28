@@ -49,28 +49,29 @@ declare global {
     var web: typeof _web
 }
 
+setGlobalAnd$({
+    selector: _selector,
+    ui: ui,
+    base64: _base64,
+    shell: _shell,
+    media: media,
+    threads: _threads,
+    floaty: _floaty,
+    images: _images,
+    automator: _automator,
+    app: _app,
+    storages: _storages,
+    engines: _engines,
+    http: _http,
+    dialogs: _dialogs,
+    events: _events,
+    paddle: _paddle,
+    plugins: _plugins,
+    sensors: _sensors,
+    web: _web
+})
 
-setGlobalAnd$('selector', _selector)
 setGlobal('shizuku', _shizuku)
-setGlobalAnd$('ui', ui)
-setGlobalAnd$('base64', _base64)
-setGlobalAnd$('shell', _shell)
-setGlobalAnd$("media", media)
-setGlobalAnd$('threads', _threads)
-setGlobalAnd$('floaty', _floaty)
-setGlobalAnd$('images', _images)
-setGlobalAnd$('automator', _automator)
-setGlobalAnd$('app', _app)
-setGlobalAnd$('storages', _storages)
-setGlobalAnd$('engines', _engines)
-setGlobalAnd$('http', _http)
-setGlobalAnd$('dialogs', _dialogs)
-setGlobalAnd$('events', _events)
-setGlobalAnd$('paddle', _paddle)
-setGlobalAnd$('plugins', _plugins)
-setGlobalAnd$('sensors', _sensors)
-setGlobalAnd$('web', _web)
-
 setGlobal('$crypto', _$cypto)
 setGlobal('$zip', _$zip)
 

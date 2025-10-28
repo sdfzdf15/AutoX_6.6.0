@@ -4,24 +4,17 @@ import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace'
 import terser from '@rollup/plugin-terser';
 import json from '@rollup/plugin-json';
-import fs from 'fs/promises'
-import path from 'node:path'
-
+import { getInput } from './input.mjs';
+import { defineConfig } from 'rollup';
 let isDev
 if (process.env.NODE_ENV === 'production') {
     isDev = false
 } else {
     isDev = true
 }
-const dirs = await fs.readdir('./src')
 
-const input = Object.fromEntries(dirs.map(name => [
-    path.join(name, 'index'),
-    path.resolve("src", name, 'index.ts')
-]))
-
-export default {
-    input,
+export default defineConfig({
+    input: await getInput(),
     output: {
         dir: "dist",
         format: 'es',
@@ -40,5 +33,5 @@ export default {
             __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: String(isDev)
         })
     ],
-    external: ['lodash']
-}
+    external: []
+})

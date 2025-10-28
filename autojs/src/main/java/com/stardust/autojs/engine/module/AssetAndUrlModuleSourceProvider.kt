@@ -2,7 +2,7 @@ package com.stardust.autojs.engine.module
 
 import android.content.ContentResolver
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.stardust.autojs.engine.encryption.ScriptEncryption.decrypt
 import com.stardust.autojs.script.EncryptedScriptFileHeader
@@ -28,8 +28,8 @@ class AssetAndUrlModuleSourceProvider(
 
     companion object {
         private const val assetRoot: String = "file:/android_asset"
-        val MODULE_DIR: URI = URI.create("file:/android_asset/modules")
-        val NPM_MODULE_DIR: URI = URI.create("file:/android_asset/modules/npm")
+        val V6MODULE_DIR: URI = toAssetUri("v6modules")
+        val NPM_MODULE_DIR: URI = toAssetUri("modules/npm")
         fun toAssetUri(assetDirPath: String): URI {
             return URI.create("$assetRoot/$assetDirPath")
         }
@@ -88,10 +88,10 @@ class AssetAndUrlModuleSourceProvider(
         } catch (e: Exception) {
             null
         }
-        mainFile?.let {
+        return if (mainFile != null) {
             //若package.json中main入口读取成功则重新执行模块加载
-            return loadFromUri(it,uri,validator)
-        }?: return loadAt(File(uri.path, "index.js").toURI(),uri,validator)
+            loadFromUri(mainFile, uri, validator)
+        } else loadAt(File(uri.path, "index.js").toURI(), uri, validator)
     }
 
     private fun loadAt(uri: URI, base: URI?, validator: Any?): ModuleSource? {
@@ -101,11 +101,11 @@ class AssetAndUrlModuleSourceProvider(
         return try {
             val inputStream = if (uri.path.startsWith("/android_asset/")) {
                 mContext.assets.open(uri.path.replace("/android_asset/", ""))
-            } else contentResolver.openInputStream(Uri.parse(uri.toString()))
+            } else contentResolver.openInputStream(uri.toString().toUri())
             if (inputStream != null) {
                 createModuleEncryptionSource(inputStream, uri, base, validator)
             } else null
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -128,18 +128,17 @@ class AssetAndUrlModuleSourceProvider(
 
     private fun loadFromHttp(uri: URI, base: URI?, validator: Any?): ModuleSource? {
         return try {
-            Request.Builder().url(uri.toString()).build().let { request ->
-                val response = okHttpClient.newCall(request).execute()
-                if (!response.isSuccessful) {
-                    response.close()
-                    return null
-                }
-                response.body?.let {
-                    val charset = it.contentType()?.charset()?.toString() ?: "utf-8"
-                    return createModuleSource(it.byteStream(), uri, base, validator, charset)
-                }
+            val request = Request.Builder().url(uri.toString()).build()
+            val response = okHttpClient.newCall(request).execute()
+            if (!response.isSuccessful) {
+                response.close()
+                return null
             }
-        } catch (e: Exception) {
+            response.body?.let {
+                val charset = it.contentType()?.charset()?.toString() ?: "utf-8"
+                return createModuleSource(it.byteStream(), uri, base, validator, charset)
+            }
+        } catch (_: Exception) {
             null
         }
     }

@@ -29,20 +29,6 @@ runtime.init();
         }
     }
 
-    global.__exitIfError__ = function (action, defReturnValue) {
-        try {
-            return action();
-        } catch (err) {
-            if (err instanceof java.lang.Throwable) {
-                exit(err);
-            } else if (err instanceof Error) {
-                exit(new org.mozilla.javascript.EvaluatorException(err.name + ": " + err.message, err.fileName, err.lineNumber));
-            } else {
-                exit();
-            }
-            return defReturnValue;
-        }
-    };
 
     // 初始化基础模块
     global.timers = require('__timers__.js')(runtime, global);

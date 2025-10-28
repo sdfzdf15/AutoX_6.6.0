@@ -1,18 +1,34 @@
 import fs from 'fs'
 import path from 'node:path'
 
+const src = "./src"
 
 export async function parseInput() {
-    const dirs = fs.readdirSync('./src').filter((name) => {
+    const dirs = fs.readdirSync(src).filter((name) => {
         if (name == 'inline_modules') {
             return false
         }
-        return fs.statSync(path.resolve("src", name)).isDirectory()
+        return fs.statSync(path.resolve(src, name)).isDirectory()
     })
-    const input = Object.fromEntries(dirs.map(name => [
-        path.join(name, 'index'),
-        path.resolve("src", name, 'index.ts')
-    ]))
-    input['init'] = "src/init.ts"
+    const input = {
+        init: "src/init.ts"
+    }
+    for (const dir of dirs) {
+        const entry = await modelInput(path.join(src, dir))
+        for (const [key, value] of Object.entries(entry)) {
+            input[path.join(dir, key)] = path.join(src, dir, value)
+        }
+    }
     return input
+}
+
+async function modelInput(dir) {
+    const entry = { index: 'index.ts' }
+    try {
+        const data = fs.readFileSync(path.join(dir, 'entry.json'), 'utf-8')
+        const json = JSON.parse(data)
+        Object.assign(entry, json)
+    } catch (e) {
+    }
+    return entry
 }

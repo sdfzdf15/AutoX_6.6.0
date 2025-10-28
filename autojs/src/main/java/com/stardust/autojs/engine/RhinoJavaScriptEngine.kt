@@ -124,8 +124,8 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
         val provider = AssetAndUrlModuleSourceProvider(
             mAndroidContext,
             listOf(
-                AssetAndUrlModuleSourceProvider.MODULE_DIR,
-                AssetAndUrlModuleSourceProvider.NPM_MODULE_DIR
+                AssetAndUrlModuleSourceProvider.NPM_MODULE_DIR,
+                AssetAndUrlModuleSourceProvider.V6MODULE_DIR
             )
         )
         require = ScopeRequire(

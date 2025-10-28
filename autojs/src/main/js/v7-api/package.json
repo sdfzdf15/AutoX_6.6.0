@@ -1,9 +1,9 @@
 {
   "name": "autox-v7-api",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "scripts": {
-    "build": "npx eslint && tsc -b && gulp build",
+    "build": "npx eslint src && tsc -b && gulp build",
     "clean": "gulp clear",
     "docs": "typedoc",
     "test": "echo \"Error: no test specified\" && exit 1"

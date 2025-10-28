@@ -1,10 +1,28 @@
 
-
-export function setGlobal(key: string, value: any) {
-    (global as any)[key] = value;
+export function setGlobal(obj: { [key: string]: any }): void
+export function setGlobal(key: string, value: any): void
+export function setGlobal(key: string | { [key: string]: any }, value?: any) {
+    if (typeof key === "string") {
+        (global as any)[key] = value;
+        return
+    }
+    if (typeof key === "object") {
+        for (const [k, value] of Object.entries(key)) {
+            setGlobal(k, value);
+        }
+        return
+    }
 }
 
-export function setGlobalAnd$(key: string, value: any) {
+export function setGlobalAnd$(obj: { [key: string]: any }): void
+export function setGlobalAnd$(key: string, value: any): void
+export function setGlobalAnd$(key: string | { [key: string]: any }, value?: any) {
+    if (typeof key === "object") {
+        for (const [k, value] of Object.entries(key)) {
+            setGlobalAnd$(k, value);
+        }
+        return
+    }
     if (key.startsWith("$")) {
         key = key.substring(1);
     }
