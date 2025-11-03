@@ -135,6 +135,7 @@ namespace Autox {
         execAutoFile(path: string, config?: EngineConfig): ScriptExecution
     }
     interface Runtime {
+        loopers: any
         shizuku: Shizuku
         shell: Shell
         files: Files
@@ -153,6 +154,7 @@ namespace Autox {
         events: Events
         plugins: any
         sensors: any
+        termux: any
         getScreenMetrics(): any
         evalInContext(script: string, context: Object): any
         getUiHandler: () => any

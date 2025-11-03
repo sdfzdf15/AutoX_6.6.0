@@ -1,8 +1,8 @@
 var threads = Object.create(runtime.threads) as Autox.Threads & {
-    runAsync<T>(fn: <T>() => T): Promise<T>
+    runAsync<T>(fn: () => T): Promise<T>
 }
 
-threads.runAsync = function <T>(fn: <T>() => T): Promise<T> {
+threads.runAsync = function <T>(fn: () => T): Promise<T> {
     return new Promise(function (resolve, reject) {
         runtime.threads.runTaskForThreadPool(function () {
             try {
@@ -22,18 +22,12 @@ global.sync = function (func: unknown, lock: unknown) {
     return new org.mozilla.javascript.Synchronizer(func, lock);
 }
 
-// Extend the Promise interface to include the wait method
-declare global {
-    interface Promise<T> {
-        wait(): T;
-    }
-}
-
-global.Promise.prototype.wait = function () {
+const r = Promise.prototype as any;
+r.wait = function () {
     var disposable = threads.disposable();
-    this.then(result => {
+    this.then((result: any) => {
         disposable.setAndNotify({ result: result });
-    }).catch(error => {
+    }).catch((error: any) => {
         disposable.setAndNotify({ error: error });
     });
     var r = disposable.blockedGet();
@@ -41,6 +35,9 @@ global.Promise.prototype.wait = function () {
         throw r.error;
     }
     return r.result;
+}
+export function startThread(fn: () => void) {
+    threads.start(fn);
 }
 
 export default threads;

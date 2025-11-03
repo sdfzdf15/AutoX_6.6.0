@@ -4,23 +4,19 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import com.stardust.autojs.runtime.ScriptRuntime
-import org.mozilla.javascript.Context
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.random.Random
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Created by Stardust on 2017/12/27.
  */
-class Timer(
-    runtime: ScriptRuntime,
-    looper: Looper
-) {
+class Timer(runtime: ScriptRuntime, looper: Looper) {
     private val myLooper: Looper = looper
     private val mHandlerCallbacks = ConcurrentHashMap<Int, Runnable?>()
     private val mRuntime: ScriptRuntime = runtime
     private val mHandler: Handler = Handler(looper)
     private val isUiLoop: Boolean = looper == Looper.getMainLooper()
-    private val context: Context? by lazy { Context.getCurrentContext() }
+    private val TimerId = AtomicInteger(1000)
 
     constructor(runtime: ScriptRuntime) : this(runtime, Looper.myLooper()!!)
 
@@ -45,14 +41,8 @@ class Timer(
         }
     }
 
-    @Synchronized
     private fun createTimerId(): Int {
-        var id: Int
-        do {
-            id = Random.nextInt()
-        } while (mHandlerCallbacks.containsKey(id))
-        mHandlerCallbacks[id] = EMPTY_RUNNABLE
-        return id
+        return TimerId.getAndAdd(1)
     }
 
     fun setInterval(listener: Any, interval: Long, vararg args: Any?): Int {
@@ -110,7 +100,7 @@ class Timer(
     }
 
     fun hasPendingCallbacks(): Boolean {
-        return mHandlerCallbacks.size > 0
+        return mHandlerCallbacks.isNotEmpty()
     }
 
     fun removeAllCallbacks() {

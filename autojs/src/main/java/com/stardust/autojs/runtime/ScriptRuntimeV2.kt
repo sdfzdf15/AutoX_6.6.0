@@ -1,6 +1,7 @@
 package com.stardust.autojs.runtime
 
 import android.os.Handler
+import com.github.aiselp.autox.api.TermuxApi
 import com.stardust.autojs.ScriptEngineService
 import com.stardust.autojs.annotation.ScriptInterface
 import com.stardust.autojs.annotation.ScriptVariable
@@ -9,6 +10,8 @@ import com.stardust.autojs.core.accessibility.SimpleActionAutomator
 import com.stardust.autojs.core.console.ConsoleImpl
 import com.stardust.autojs.core.image.capture.ScreenCaptureRequester
 import com.stardust.autojs.core.looper.Loopers
+import com.stardust.autojs.core.util.WeakReferenceKey
+import com.stardust.autojs.onnx.OnnxModule
 import com.stardust.autojs.rhino.AndroidClassLoader
 import com.stardust.autojs.rhino.TopLevelScope
 import com.stardust.autojs.runtime.api.AppUtils
@@ -39,13 +42,15 @@ import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringReader
 import java.io.StringWriter
-import com.stardust.autojs.onnx.OnnxModule
 
 class ScriptRuntimeV2(val builder: Builder) : ScriptRuntime(builder) {
+    val weakReferenceKey = WeakReferenceKey()
     lateinit var consoleExtension: ConsoleExtension
     val shell = ScriptShell()
     val keyboard = Keyboard()
     val shizuku = Shizuku(uiHandler.context)
+
+    val termux = TermuxApi(uiHandler.context)
 
     val gmlkit: GoogleMLKit = GoogleMLKit()
 
@@ -133,8 +138,10 @@ class ScriptRuntimeV2(val builder: Builder) : ScriptRuntime(builder) {
 
     override fun onExit() {
         super.onExit()
+        weakReferenceKey.release()
         shell.recycle(console)
         shizuku.recycle()
+        termux.recycle()
         consoleExtension.close()
         ObjectWatcher.default.watch(this, engines.myEngine().toString() + "::" + TAG)
     }

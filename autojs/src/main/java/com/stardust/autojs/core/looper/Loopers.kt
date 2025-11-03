@@ -28,14 +28,6 @@ class Loopers(val runtime: ScriptRuntime) {
     }
 
     open class AsyncTask(private val describe: String) {
-        private val allBind = ConcurrentLinkedQueue<Loopers>()
-        var isEnd: Boolean = false
-            private set
-
-        fun end() {
-            isEnd = true
-        }
-
         //线程正在退出，这里应该结束任务的执行，回收资源
         open fun onStop(loopers: Loopers) {}
         override fun toString(): String {
@@ -80,7 +72,6 @@ class Loopers(val runtime: ScriptRuntime) {
 
 
     private fun checkTask(): Boolean {
-        allTasks.removeAll(allTasks.filter { it.isEnd }.toSet())
         return allTasks.isNotEmpty()
     }
 
@@ -117,7 +108,7 @@ class Loopers(val runtime: ScriptRuntime) {
     fun recycle() {
         Log.d(LOG_TAG, "recycle")
         available = false
-        for (task in allTasks.filter { !it.isEnd }) {
+        for (task in allTasks) {
             try {
                 task.onStop(this)
             } catch (e: Exception) {

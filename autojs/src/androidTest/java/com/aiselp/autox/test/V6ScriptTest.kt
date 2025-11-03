@@ -160,7 +160,7 @@ class V6ScriptTest {
     }
 
     @Test
-    fun modules_import(){
+    fun modules_import() {
         runScriptAssetSuccessfully("modules_import.js")
     }
 

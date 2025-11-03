@@ -105,6 +105,10 @@ javet-android-node = "com.caoccao.javet:javet-node-android:4.1.5"
 shizuku-api = "dev.rikka.shizuku:api:13.1.5"
 shizuku-provider = "dev.rikka.shizuku:provider:13.1.5"
 
+# termux
+termux-shared = "com.termux.termux-app:termux-shared:0.118.0"
+terminal-view = "com.termux.termux-app:terminal-view:0.118.0"
+
 ktsh = "com.jaredrummler:ktsh:1.0.0"
 
 #test libraries ===================================

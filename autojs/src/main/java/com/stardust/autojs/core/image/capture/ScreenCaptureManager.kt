@@ -8,7 +8,8 @@ import android.content.ServiceConnection
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.IBinder
-import com.stardust.app.OnActivityResultDelegate
+import androidx.activity.result.contract.ActivityResultContract
+import com.github.aiselp.autox.activity.TransparentActivity
 import kotlinx.coroutines.CompletableDeferred
 import java.util.concurrent.CancellationException
 
@@ -23,16 +24,15 @@ class ScreenCaptureManager : ScreenCaptureRequester {
             return
         }
 
-        val result = if (context is OnActivityResultDelegate.DelegateHost && context is Activity) {
-            ScreenCaptureRequester.ActivityScreenCaptureRequester(
-                context.onActivityResultDelegateMediator, context
-            ).request()
-        } else {
+        val result = run {
             val result = CompletableDeferred<Intent>()
-            ScreenCaptureRequestActivity.request(context) { data ->
-                if (data != null) {
-                    result.complete(data)
-                } else result.cancel(CancellationException("data is null"))
+            TransparentActivity.requestNewActivity(context) { activity ->
+                activity.registerForActivityResult(ScreenCaptureRequester()) { data ->
+                    activity.finish()
+                    if (data != null) {
+                        result.complete(data)
+                    } else result.completeExceptionally(CancellationException("data is null"))
+                }.launch(activity)
             }
             result.await()
         }
@@ -68,6 +68,18 @@ class ScreenCaptureManager : ScreenCaptureRequester {
             Context.BIND_AUTO_CREATE
         )
         serviceConnected.await()
+    }
+
+    class ScreenCaptureRequester : ActivityResultContract<Context, Intent?>() {
+        override fun createIntent(context: Context, input: Context): Intent {
+            return (input.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager).createScreenCaptureIntent()
+        }
+
+        override fun parseResult(resultCode: Int, intent: Intent?): Intent? {
+            return if (resultCode != Activity.RESULT_OK) {
+                null
+            } else intent
+        }
     }
 
     override fun recycle() {

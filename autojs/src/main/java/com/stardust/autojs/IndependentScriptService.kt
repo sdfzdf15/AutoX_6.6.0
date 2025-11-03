@@ -13,6 +13,7 @@ import android.os.Process
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.github.aiselp.autox.api.TermuxApi
 import com.stardust.app.service.AbstractAutoService
 import com.stardust.autojs.core.pref.Pref
 import com.stardust.autojs.servicecomponents.ScriptBinder
@@ -83,6 +84,9 @@ class IndependentScriptService : AbstractAutoService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent != null) {
+            TermuxApi.onHandleIntent(intent)
+        }
         val action = intent?.action
         when (action) {
             ACTION_START_FOREGROUND -> startForeground()

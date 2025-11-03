@@ -56,13 +56,9 @@ class CaptureForegroundService : AbstractAutoService() {
 
     private fun buildNotification(): Notification {
         createNotificationChannel()
-        val flags = PendingIntent.FLAG_IMMUTABLE
-        val contentIntent = PendingIntent.getActivity(
-            this, 0, Intent(this, ScreenCaptureRequestActivity::class.java), flags
-        )
         return NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle(NOTIFICATION_TITLE)
             .setSmallIcon(R.drawable.autojs_logo).setWhen(System.currentTimeMillis())
-            .setContentIntent(contentIntent).addAction(createExitAction()).setChannelId(CHANNEL_ID)
+            .addAction(createExitAction()).setChannelId(CHANNEL_ID)
             .setVibrate(LongArray(0)).setOngoing(false).build()
     }
 

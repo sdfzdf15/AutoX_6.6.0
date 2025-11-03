@@ -1,3 +1,4 @@
+import { startThread } from "./therads";
 
 export function setGlobal(obj: { [key: string]: any }): void
 export function setGlobal(key: string, value: any): void
@@ -60,4 +61,35 @@ export function asGlobal(obj: any, keys: string[]) {
         }
         (global as any)[funcName] = func.bind(obj);
     }
+}
+
+
+const loopers = runtime.loopers
+const weakReferenceKey = (runtime as any).weakReferenceKey
+
+export function createCallbackWrapper<T>(callback: T): T {
+    if (typeof callback !== 'function')
+        throw new Error('Callback must be a function')
+    const t = loopers.createAndAddAsyncTask('callback_wrapper')
+    const v = weakReferenceKey.newRefValue(callback)
+    const fn = function (...args: any[]) {
+        const cb = v.value
+        if (cb !== null) {
+            startThread(() => {
+                try {
+                    exitIfError(() => {
+                        cb(...args)
+                    })
+                } catch (e: any) {
+                    //ignore
+                }
+            })
+            loopers.removeAsyncTask(t)
+        } else {
+            loopers.removeAsyncTask(t)
+        }
+    }
+    fn.name = `callback_wrapper<${callback.name}>`
+
+    return fn as any
 }

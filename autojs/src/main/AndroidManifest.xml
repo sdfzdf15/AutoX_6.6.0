@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
     xmlns:tools="http://schemas.android.com/tools">
+
+    <queries>
+        <package android:name="com.termux" />
+    </queries>
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -55,22 +58,14 @@
             android:name="com.aiselp.autox.activity.VueUiScriptActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|navigation|orientation|screenLayout|screenSize|uiMode"
             android:process="@string/text_script_process_name" />
-
         <activity
-            android:name="com.aiselp.autox.activity.AppDialogActivity"
+            android:name="com.github.aiselp.autox.activity.TransparentActivity"
             android:process="@string/text_script_process_name"
             android:theme="@style/TransparentDialogTheme" />
 
         <activity
             android:name="com.stardust.autojs.core.permission.PermissionRequestActivity"
             android:excludeFromRecents="true"
-            android:taskAffinity="com.stardust.autojs.runtime.api.image.ScreenCaptureRequestActivity"
-            android:theme="@style/ScriptTheme.Transparent" />
-
-        <activity
-            android:name="com.stardust.autojs.core.image.capture.ScreenCaptureRequestActivity"
-            android:excludeFromRecents="true"
-            android:process="@string/text_script_process_name"
             android:taskAffinity="com.stardust.autojs.runtime.api.image.ScreenCaptureRequestActivity"
             android:theme="@style/ScriptTheme.Transparent" />
 
