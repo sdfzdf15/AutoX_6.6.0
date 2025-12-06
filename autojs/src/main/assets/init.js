@@ -34,7 +34,6 @@ runtime.init();
     global.timers = require('__timers__.js')(runtime, global);
 
     //初始化不依赖环境的模块
-    global.JSON = require('__json2__.js');
     global.util = global.$util = require('__util__.js');
     global.device = runtime.device;
     global.keyboard = Object.create(runtime.keyboard);
