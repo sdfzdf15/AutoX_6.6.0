@@ -9,7 +9,8 @@ import com.stardust.lang.ThreadCompat
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import org.mozilla.javascript.Context
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ConcurrentHashMap
+import java.util.function.Supplier
 
 /**
  * Created by Stardust on 2017/7/29.
@@ -21,11 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * 调整timer由此类创建
  *  通过向此类添加AsyncTask以监听线程退出事件
  */
-class Loopers(val runtime: ScriptRuntime) {
-    @Deprecated("使用AsyncTask代替")
-    interface LooperQuitHandler {
-        fun shouldQuit(): Boolean
-    }
+class Loopers(val runtime: ScriptRuntime) : MessageQueue.IdleHandler {
 
     open class AsyncTask(private val describe: String) {
         //线程正在退出，这里应该结束任务的执行，回收资源
@@ -39,8 +36,8 @@ class Loopers(val runtime: ScriptRuntime) {
 
     @Volatile
     private var mServantLooper: Looper? = null
-    private var mMainLooperQuitHandler: LooperQuitHandler? = null
-    private val allTasks = ConcurrentLinkedQueue<AsyncTask>()
+    private val allTasks = ConcurrentHashMap.newKeySet<AsyncTask>()
+    private val quitHandlers = ConcurrentHashMap.newKeySet<Supplier<Boolean>>()
     val mTimer: Timer
     val myLooper: Looper
 
@@ -76,8 +73,8 @@ class Loopers(val runtime: ScriptRuntime) {
     }
 
     private fun shouldQuitLooper(): Boolean {
+        if (Thread.currentThread().isInterrupted) return true
         synchronized(myLooper) {
-            if (Thread.currentThread().isInterrupted) return true
             if (mTimer.hasPendingCallbacks()) return false
             //检查是否有运行中的线程
             if (checkTask()) return false
@@ -108,6 +105,7 @@ class Loopers(val runtime: ScriptRuntime) {
     fun recycle() {
         Log.d(LOG_TAG, "recycle")
         available = false
+        myLooper.queue.removeIdleHandler(this)
         for (task in allTasks) {
             try {
                 task.onStop(this)
@@ -115,6 +113,8 @@ class Loopers(val runtime: ScriptRuntime) {
                 Log.w(LOG_TAG, e)
             }
         }
+        allTasks.clear()
+        quitHandlers.clear()
         mServantLooper?.quit()
     }
 
@@ -124,33 +124,29 @@ class Loopers(val runtime: ScriptRuntime) {
         }
     }
 
-    @Deprecated("使用AsyncTask代替")
-    fun setMainLooperQuitHandler(mainLooperQuitHandler: LooperQuitHandler?) {
-        mMainLooperQuitHandler = mainLooperQuitHandler
+    fun addQuitHandler(handler: Supplier<Boolean>) {
+        quitHandlers.add(handler)
     }
+
+    fun checkQuitHandlers(): Boolean {
+        for (handler in quitHandlers) {
+            try {
+                val bool = handler.get()
+                if (bool) return true
+                else quitHandlers.remove(handler)
+            } catch (e: Exception) {
+                Log.w(LOG_TAG, e)
+                quitHandlers.remove(handler)
+            }
+        }
+        return false
+    }
+
 
     private fun prepare() {
         if (isUiLooper) return
         if (Looper.myLooper() == null) Looper.prepare()
-        Looper.myQueue().addIdleHandler(MessageQueue.IdleHandler {
-            if (this == runtime.loopers) {
-                Log.d(LOG_TAG, "main looper queueIdle")
-                if (shouldQuitLooper() &&
-                    mMainLooperQuitHandler != null &&
-                    mMainLooperQuitHandler!!.shouldQuit()
-                ) {
-                    Log.d(LOG_TAG, "main looper quit")
-                    Looper.myLooper()!!.quitSafely()
-                }
-            } else {
-                Log.d(LOG_TAG, "looper queueIdle $this")
-                if (shouldQuitLooper()) {
-                    Log.d(LOG_TAG, "looper quit $this")
-                    Looper.myLooper()!!.quitSafely()
-                }
-            }
-            return@IdleHandler true
-        })
+        Looper.myQueue().addIdleHandler(this)
     }
 
     fun notifyThreadExit(thread: TimerThread) {
@@ -161,8 +157,26 @@ class Loopers(val runtime: ScriptRuntime) {
     }
 
     fun addAsyncTaskToCurrentThreadLooper(task: AsyncTask) {
-         (Thread.currentThread() as? TimerThread)?.loopers?.addAsyncTask(task) ?: addAsyncTask(task)
+        (Thread.currentThread() as? TimerThread)?.loopers?.addAsyncTask(task) ?: addAsyncTask(task)
     }
+
+    override fun queueIdle(): Boolean {
+        if (this == runtime.loopers) {
+            Log.d(LOG_TAG, "main looper queueIdle")
+            if (shouldQuitLooper() && !checkQuitHandlers()) {
+                Log.d(LOG_TAG, "main looper quit")
+                Looper.myLooper()!!.quitSafely()
+            }
+        } else {
+            Log.d(LOG_TAG, "looper queueIdle $this")
+            if (shouldQuitLooper()) {
+                Log.d(LOG_TAG, "looper quit $this")
+                Looper.myLooper()!!.quitSafely()
+            }
+        }
+        return true
+    }
+
     companion object {
         private const val LOG_TAG = "Loopers"
         private val EMPTY_RUNNABLE = Runnable {}

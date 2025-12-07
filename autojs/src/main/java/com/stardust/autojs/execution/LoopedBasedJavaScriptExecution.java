@@ -3,8 +3,9 @@ package com.stardust.autojs.execution;
 import com.stardust.autojs.engine.LoopBasedJavaScriptEngine;
 import com.stardust.autojs.engine.ScriptEngine;
 import com.stardust.autojs.engine.ScriptEngineManager;
-import com.stardust.autojs.core.looper.Loopers;
 import com.stardust.autojs.script.JavaScriptSource;
+
+import java.util.function.Supplier;
 
 /**
  * Created by Stardust on 2017/10/27.
@@ -24,19 +25,18 @@ public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
         sleep(delay);
         final LoopBasedJavaScriptEngine javaScriptEngine = (LoopBasedJavaScriptEngine) engine;
         final long interval = getConfig().getInterval();
-        javaScriptEngine.getRuntime().loopers.setMainLooperQuitHandler(new Loopers.LooperQuitHandler() {
+        javaScriptEngine.getRuntime().loopers.addQuitHandler(new Supplier<>() {
             long times = getConfig().getLoopTimes() == 0 ? Integer.MAX_VALUE : getConfig().getLoopTimes();
 
             @Override
-            public boolean shouldQuit() {
+            public Boolean get() {
                 times--;
                 if (times > 0) {
                     sleep(interval);
                     javaScriptEngine.execute(getSource());
-                    return false;
+                    return true;
                 }
-                javaScriptEngine.getRuntime().loopers.setMainLooperQuitHandler(null);
-                return true;
+                return false;
             }
         });
         javaScriptEngine.execute(getSource());
