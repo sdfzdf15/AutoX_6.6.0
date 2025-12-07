@@ -8,6 +8,7 @@ import com.stardust.autojs.annotation.ScriptVariable
 import com.stardust.autojs.core.accessibility.AccessibilityBridge
 import com.stardust.autojs.core.accessibility.SimpleActionAutomator
 import com.stardust.autojs.core.console.ConsoleImpl
+import com.stardust.autojs.core.http.MutableOkHttp
 import com.stardust.autojs.core.image.capture.ScreenCaptureRequester
 import com.stardust.autojs.core.looper.Loopers
 import com.stardust.autojs.core.util.WeakReferenceKey
@@ -48,6 +49,7 @@ class ScriptRuntimeV2(val builder: Builder) : ScriptRuntime(builder) {
     lateinit var consoleExtension: ConsoleExtension
     val shell = ScriptShell()
     val keyboard = Keyboard()
+    val mutableOkHttp = MutableOkHttp()
     val shizuku = Shizuku(uiHandler.context)
 
     val termux = TermuxApi(uiHandler.context)
@@ -138,6 +140,7 @@ class ScriptRuntimeV2(val builder: Builder) : ScriptRuntime(builder) {
 
     override fun onExit() {
         super.onExit()
+        mutableOkHttp.destroy()
         weakReferenceKey.release()
         shell.recycle(console)
         shizuku.recycle()

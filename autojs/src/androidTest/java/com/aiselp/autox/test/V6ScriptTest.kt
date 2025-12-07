@@ -90,6 +90,18 @@ class V6ScriptTest {
     }
 
     @Test
+    fun threads2_test() {
+        val resultViewer = ScriptResultViewer()
+        val execute =
+            getScriptEngineService().execute(openScriptSource("threads2.js"), resultViewer)
+        runBlocking {
+            resultViewer.waitForSuccess(5000) { execute.engine.forceStop() }
+        }
+        assert(execute.engine.getGlobalProperty("a") == 4.0)
+        assert(execute.engine.getGlobalProperty("b") == 6.0)
+    }
+
+    @Test
     fun emitter_test() {
         runScriptAssetSuccessfully("emitter.js", 2500)
     }
@@ -165,13 +177,13 @@ class V6ScriptTest {
     }
 
     @Test
-    fun http(){
+    fun http() {
         val file = openScriptAsset(application, "utils/http_server.mjs")
         val execute = getScriptEngineService().execute(ScriptFile(file.toFile()).toSource())
         Thread.sleep(200)
         try {
             runScriptAssetSuccessfully("http.js", 5000)
-        }finally {
+        } finally {
             execute.engine.forceStop()
             Thread.sleep(200)
         }

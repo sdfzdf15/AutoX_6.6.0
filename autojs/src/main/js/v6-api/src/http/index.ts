@@ -1,14 +1,22 @@
 
+import { createCallbackWrapper } from "@/utils";
 import { HttpOptions, K, Response } from "./types";
-declare const continuation: any;
+import { startThread } from "@/therads";
 
-const MutableOkHttp = com.stardust.autojs.core.http.MutableOkHttp
 const { Callback, Request, RequestBody, MediaType, FormBody, MultipartBody } = Packages["okhttp3"]
 var http = {
-    get, post, postJson, request, buildRequest, client, postMultipart
+    get, post, postJson, request, buildRequest, client, postMultipart,
+    setTimeout: _setTimeout
 };
 
-const __okhttp__ = new MutableOkHttp();
+const __okhttp__ = (runtime as any).mutableOkHttp
+
+function _setTimeout(timeout: number) {
+    if (typeof timeout !== "number" || timeout < 0) {
+        throw new Error("http.setTimeout: timeout must be a non-negative number");
+    }
+    __okhttp__.setTimeout(timeout);
+}
 
 function get(url: string): Response
 function get(url: string, options: HttpOptions, callback: K): void
@@ -55,20 +63,18 @@ function request(url: string, options?: HttpOptions, callback?: K): Response | v
     var call = http.client().newCall(http.buildRequest(url, options));
     if (!callback) {
         return wrapResponse(call.execute());
+    } else {
+        const cb = createCallbackWrapper(callback);
+        startThread(function () {
+            let res
+            try {
+                res = call.execute();
+                cb(wrapResponse(res));
+            } catch (ex: any) {
+                cb(null, ex);
+            }
+        })
     }
-    call.enqueue(new Callback({
-        onResponse: function (call: unknown, res: any) {
-            res = wrapResponse(res);
-            if (callback) {
-                callback(res);
-            }
-        },
-        onFailure: function (call: unknown, ex: any) {
-            if (callback) {
-                callback(null, ex);
-            }
-        }
-    }));
 }
 
 function buildRequest(url: string, options?: HttpOptions) {

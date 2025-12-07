@@ -1,15 +1,21 @@
 var threads = Object.create(runtime.threads) as Autox.Threads & {
     runAsync<T>(fn: () => T): Promise<T>
+    runOnMainThread(fn: () => void): void
 }
 
+const main = threads.currentThread()
+
+threads.runOnMainThread = function (fn: () => void) {
+    main.setImmediate(fn);
+}
 threads.runAsync = function <T>(fn: () => T): Promise<T> {
     return new Promise(function (resolve, reject) {
         runtime.threads.runTaskForThreadPool(function () {
             try {
                 const result: T = fn();
-                setImmediate(resolve, result)
+                resolve(result)
             } catch (e) {
-                setImmediate(reject, e)
+                reject(e)
             }
         })
     })

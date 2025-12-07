@@ -32,3 +32,25 @@ console.assert(res.statusCode == 200)
 data = res.body.json()
 console.assert(data.method == "POST")
 console.assert(data.headers['content-type'].startsWith("multipart/form-data;"))
+
+let out = false
+http.setTimeout(1)
+try {
+    http.get("www.baidu.com")
+}catch (e){
+    out = true
+}
+console.assert(out, "async http get error handling failed")
+http.setTimeout(30*1000)
+
+let te = false
+http.get(uri,{},function(res,err){
+    if (err) return
+    if (res.statusCode == 200) {
+        te = true
+    }
+})
+
+setTimeout(function() {
+    console.assert(te, "async http get failed")
+},1000)
