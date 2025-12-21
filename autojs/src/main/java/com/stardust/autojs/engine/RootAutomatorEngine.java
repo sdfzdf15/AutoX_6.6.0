@@ -1,9 +1,9 @@
 package com.stardust.autojs.engine;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
+import androidx.preference.PreferenceManager;
 import com.stardust.autojs.core.util.ProcessShell;
 import com.stardust.autojs.core.inputevent.InputDevices;
 import com.stardust.autojs.runtime.exception.ScriptException;

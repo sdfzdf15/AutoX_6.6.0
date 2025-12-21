@@ -1,11 +1,14 @@
 package com.stardust.autojs.core.inputevent;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
 import android.text.TextUtils;
 
 import com.stardust.autojs.core.record.inputevent.EventFormatException;
 import com.stardust.autojs.core.util.Shell2;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -93,7 +96,11 @@ public class InputEventObserver {
     public void observe() {
         if (mShell != null)
             throw new IllegalStateException("observe() should be called only once");
-        mShell = new Shell2("su");
+        try {
+            mShell = new Shell2("su");
+        } catch (Exception e) {
+            return;
+        }
         mShell.setCallback(new Shell2.Callback() {
             @Override
             public void onOutput(@Nullable String str) {

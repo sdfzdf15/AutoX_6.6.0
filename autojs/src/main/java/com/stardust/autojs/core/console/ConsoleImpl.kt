@@ -147,7 +147,6 @@ open class ConsoleImpl @JvmOverloads constructor(
             return
         }
         if (!FloatingPermission.canDrawOverlays(mUiHandler.context)) {
-            FloatingPermission.manageDrawOverlays(mUiHandler.context)
             mUiHandler.toast(R.string.text_no_floating_window_permission)
             return
         }
