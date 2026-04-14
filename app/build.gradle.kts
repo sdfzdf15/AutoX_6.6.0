@@ -29,6 +29,9 @@ if (propFile.exists()) {
 //}
 android {
     compileSdk = versions.compile
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "org.autojs.autoxjs"
         minSdk = versions.mini
@@ -56,7 +59,7 @@ android {
     }
     lint {
         abortOnError = false
-        disable.addAll(listOf("MissingTranslation", "ExtraTranslation"))
+        disable.addAll(listOf("MissingTranslation", "ExtraTranslation", "IssueRegistry"))
     }
     compileOptions {
         sourceCompatibility = versions.javaVersion
@@ -156,7 +159,7 @@ android {
         exclude(group = "com.github.atlassian.commonmark-java", module = "commonmark")
     }
 
-    packagingOptions {
+    packaging {
         //ktor netty implementation("io.ktor:ktor-server-netty:2.0.1")
         resources.pickFirsts.addAll(
             listOf(
@@ -182,7 +185,9 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material)
     implementation(libs.compose.ui.tooling.preview)
-    androidTestImplementation(libs.compose.ui.test.junit4)
+    //androidTestImplementation(libs.compose.ui.test.junit4)
+    // 改成这样
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.activity.compose)
 
@@ -362,4 +367,12 @@ tasks.register("installationDocumentation") {
 }
 tasks.named("clean").configure {
     doFirst { delete(docsDir) }
+}
+repositories {
+    google() // 👈 就加这个！
+    maven("https://maven.aliyun.com/repository/google")
+    maven("https://maven.aliyun.com/repository/central")
+    maven("https://maven.aliyun.com/repository/public")
+    maven("https://www.jitpack.io")
+    mavenCentral()
 }

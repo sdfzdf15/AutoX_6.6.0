@@ -2,7 +2,7 @@ package com.stardust.autojs.util
 
 interface ObjectWatcher {
     fun watch(watchedObject: Any, description: String)
-
+    @Suppress("DEPRECATION")
     companion object {
         val default: ObjectWatcher = try {
             Class.forName("com.aiselp.debug.ObjectWatcher").newInstance()

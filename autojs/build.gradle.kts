@@ -7,7 +7,9 @@ kotlin {
 }
 android {
     compileSdk = versions.compile
-
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         minSdk = versions.mini
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -43,6 +45,9 @@ dependencies {
 
     implementation(libs.documentfile)
     implementation(libs.preference.ktx)
+    implementation(project(":common"))  // <-- 加这一行
+    // 加上这句！
+    // implementation("org.mozilla:rhino:1.7.15")
     api(libs.eventbus)
     api("net.lingala.zip4j:zip4j:1.3.2")
     api("com.afollestad.material-dialogs:core:0.9.2.3")
@@ -54,7 +59,9 @@ dependencies {
     // JDeferred
     api("org.jdeferred:jdeferred-android-aar:1.2.6")
     // RootShell
-    api("com.github.Stericson:RootShell:1.6")
+    // api("com.github.Stericson:RootShell:1.6")
+    //<-- 新的，本地 jar 2026.4.1
+    api(files("libs/RootShell-1.6.jar"))
     // Gson
     api(libs.google.gson)
     // log4j
@@ -70,6 +77,9 @@ dependencies {
     api(project(":paddleocr"))
     // libs
     api(fileTree("../app/libs"){include("dx.jar", "rhino-1.7.14-jdk7.jar")})
+    //api(fileTree("../app/libs"){include("dx.jar", "rhino-1.7.15.jar")})
+    //api(fileTree(mapOf("dir" to "../app/libs", "include" to listOf("dx.jar", "rhino-1.7.15.jar"))))
+
     api("cz.adaptech:tesseract4android:4.1.1")
     api("com.google.mlkit:text-recognition:16.0.0-beta5")
     api("com.google.mlkit:text-recognition-chinese:16.0.0-beta5")

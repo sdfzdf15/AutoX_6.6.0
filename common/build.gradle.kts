@@ -9,7 +9,9 @@ kotlin {
 }
 android {
     compileSdk = versions.compile
-
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         minSdk = versions.mini
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

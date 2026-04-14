@@ -13,7 +13,16 @@ import java.io.File;
 
 public class Pref {
     private static String KEY_FIRST_USING = "key_first_using";
+    // ====================== 开机自启配置 ======================
+    public static final String KEY_BOOT_AUTO_START = "key_boot_auto_start";
 
+    public static boolean isBootAutoStartEnabled() {
+        return def().getBoolean(KEY_BOOT_AUTO_START, false);
+    }
+
+    public static void setBootAutoStartEnabled(boolean enabled) {
+        def().edit().putBoolean(KEY_BOOT_AUTO_START, enabled).apply();
+    }
     private static SharedPreferences def() {
         return PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get());
     }

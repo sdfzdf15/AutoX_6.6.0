@@ -104,7 +104,13 @@ class CaptureForegroundService : Service() {
         mediaProjection?.unregisterCallback(callback)
         mediaProjection?.stop()
         removeNotification()
-        stopForeground(true)
+        // 👇 版本兼容写法，完美解决报错+警告
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            stopForeground(Service.STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
     }
 
     companion object {

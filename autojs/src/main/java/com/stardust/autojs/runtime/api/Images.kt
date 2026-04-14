@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.os.Build
 import android.os.Looper
 import android.util.Base64
 import android.view.Gravity
@@ -145,7 +146,14 @@ class Images(
         when (format) {
             "png" -> return CompressFormat.PNG
             "jpeg", "jpg" -> return CompressFormat.JPEG
-            "webp" -> return CompressFormat.WEBP
+            "webp" -> {
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    CompressFormat.WEBP_LOSSLESS
+                } else {
+                    @Suppress("DEPRECATION")
+                    CompressFormat.WEBP
+                }
+            }
         }
         return null
     }
@@ -290,8 +298,9 @@ class Images(
     }
 
     fun concat(img1: ImageWrapper, img2: ImageWrapper, direction: Int): ImageWrapper {
-        var img1 = img1
-        var img2 = img2
+        // 重命名，避免和参数重名
+        var image1 = img1
+        var image2 = img2
         require(
             listOf(
                 Gravity.LEFT,
@@ -303,34 +312,34 @@ class Images(
         val width: Int
         val height: Int
         if (direction == Gravity.LEFT || direction == Gravity.TOP) {
-            val tmp = img1
-            img1 = img2
-            img2 = tmp
+            val tmp = image1
+            image1 = image2
+            image2 = tmp
         }
         if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
-            width = img1.width + img2.width
-            height = Math.max(img1.height, img2.height)
+            width = image1.width + image2.width
+            height = Math.max(image1.height, image2.height)
         } else {
-            width = Math.max(img1.width, img2.height)
-            height = img1.height + img2.height
+            width = Math.max(image1.width, image2.height)
+            height = image1.height + image2.height
         }
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint()
         if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
-            canvas.drawBitmap(img1.bitmap, 0f, ((height - img1.height) / 2).toFloat(), paint)
+            canvas.drawBitmap(image1.bitmap, 0f, ((height - image1.height) / 2).toFloat(), paint)
             canvas.drawBitmap(
-                img2.bitmap,
-                img1.width.toFloat(),
-                ((height - img2.height) / 2).toFloat(),
+                image2.bitmap,
+                image1.width.toFloat(),
+                ((height - image2.height) / 2).toFloat(),
                 paint
             )
         } else {
-            canvas.drawBitmap(img1.bitmap, ((width - img1.width) / 2).toFloat(), 0f, paint)
+            canvas.drawBitmap(image1.bitmap, ((width - image1.width) / 2).toFloat(), 0f, paint)
             canvas.drawBitmap(
-                img2.bitmap,
-                ((width - img2.width) / 2).toFloat(),
-                img1.height.toFloat(),
+                image2.bitmap,
+                ((width - image2.width) / 2).toFloat(),
+                image1.height.toFloat(),
                 paint
             )
         }

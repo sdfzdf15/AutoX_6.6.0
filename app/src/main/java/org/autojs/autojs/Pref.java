@@ -18,6 +18,42 @@ import java.util.concurrent.TimeUnit;
  */
 public class Pref {
 
+    // ====================== 开机自启配置 ======================
+    public static final String KEY_BOOT_AUTO_START = "key_boot_auto_start";
+
+    public static boolean isBootAutoStartEnabled() {
+        return def().getBoolean(KEY_BOOT_AUTO_START, false);
+    }
+
+    public static void setBootAutoStartEnabled(boolean enabled) {
+        def().edit().putBoolean(KEY_BOOT_AUTO_START, enabled).apply();
+    }
+    // ==========================================================
+
+
+    // ====================== 【新增】忽略电池优化 ======================
+    public static final String KEY_IGNORE_BATTERY_OPTIMIZATION = "ignore_battery_optimization";
+
+    public static boolean isIgnoreBatteryOptimizationEnabled() {
+        return def().getBoolean(KEY_IGNORE_BATTERY_OPTIMIZATION, false);
+    }
+
+    public static void setIgnoreBatteryOptimizationEnabled(boolean enabled) {
+        def().edit().putBoolean(KEY_IGNORE_BATTERY_OPTIMIZATION, enabled).apply();
+    }
+    // ===============================================================
+    // ====================== 【新增】后台弹出界面权限存储 ======================
+    public static final String KEY_BACKGROUND_POPUP = "background_popup_permission";
+
+    public static boolean isBackgroundPopupEnabled() {
+        return def().getBoolean(KEY_BACKGROUND_POPUP, false);
+    }
+
+    public static void setBackgroundPopupEnabled(boolean enabled) {
+        def().edit().putBoolean(KEY_BACKGROUND_POPUP, enabled).apply();
+    }
+    // ======================================================================
+
     private static final SharedPreferences DISPOSABLE_BOOLEAN = GlobalAppContext.get().getSharedPreferences("DISPOSABLE_BOOLEAN", Context.MODE_PRIVATE);
     private static final String KEY_SERVER_ADDRESS = "KEY_SERVER_ADDRESS";
     private static final String KEY_SHOULD_SHOW_ANNUNCIATION = "KEY_SHOULD_SHOW_ANNUNCIATION";
@@ -142,7 +178,7 @@ public class Pref {
 
     public static String getDocumentationUrl() {
 //        String docSource = def().getString(getString(R.string.key_documentation_source), null);
-        return "http://doc.autoxjs.com/";
+        return "https://autoxjs.dayudada.com/";
     }
 
     public static boolean isFloatingMenuShown() {

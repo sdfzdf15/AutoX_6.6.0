@@ -1,10 +1,37 @@
+pluginManagement {
+    repositories {
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/central") }
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
+        maven { url = uri("https://mirrors.tuna.tsinghua.edu.cn/repository/maven-public/") }
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = uri("https://www.jitpack.io") }
+    }
+}
 
-include ':app', ':automator', ':common', ':autojs', ':inrt', ':apkbuilder'
-include ':LocalRepo:libtermexec'
-include ':LocalRepo:emulatorview'
-include ':LocalRepo:term'
-include ':LocalRepo:p7zip'
-include ':LocalRepo:OpenCV'
-//include ':LocalRepo:PaddleOCR4Android'
-include ':paddleocr'
-include ':codeeditor'
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
+        maven { url = uri("https://maven.aliyun.com/repository/central") }
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://mirrors.tuna.tsinghua.edu.cn/repository/maven-public/") }
+        google()
+        mavenCentral()
+        maven { url = uri("https://www.jitpack.io") }
+    }
+}
+
+// 这里不写 rootProject.name 完全可以！
+
+include(":app", ":automator", ":common", ":autojs", ":inrt", ":apkbuilder")
+include(":LocalRepo:libtermexec")
+include(":LocalRepo:emulatorview")
+include(":LocalRepo:term")
+include(":LocalRepo:p7zip")
+include(":LocalRepo:OpenCV")
+include(":paddleocr")
+include(":codeeditor")

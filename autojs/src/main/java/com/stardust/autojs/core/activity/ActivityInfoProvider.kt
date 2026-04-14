@@ -103,7 +103,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             return
         }
         val latestPackage = matcher.group(1)
-        if (latestPackage.contains(":")) {
+        if (latestPackage?.contains(":") == true) {
             return
         }
         val latestActivity = if (matcher.groupCount() >= 2) {
@@ -112,7 +112,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             ""
         }
         Log.d(LOG_TAG, "setLatestComponent: output = $output, comp = $latestPackage/$latestActivity")
-        mLatestComponentFromShell = ComponentName(latestPackage, latestActivity)
+        mLatestComponentFromShell = ComponentName(latestPackage ?: "", latestActivity)
     }
 
     private fun createShell(dumpInterval: Int): Shell {

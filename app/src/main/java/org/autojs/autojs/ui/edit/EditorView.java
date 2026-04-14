@@ -480,6 +480,8 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
     @SuppressLint("CheckResult")
     public void saveFile() {
+        // 👇 就加这一行！！！
+       // hideKeyboardInput();
         save()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(Observers.emptyConsumer(), e -> {

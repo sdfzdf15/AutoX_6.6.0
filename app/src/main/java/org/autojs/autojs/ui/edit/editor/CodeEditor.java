@@ -19,7 +19,6 @@ import com.stardust.util.ViewUtils;
 import org.autojs.autojs.Pref;
 import org.autojs.autojs.ui.edit.theme.Theme;
 import org.autojs.autoxjs.R;
-
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.regex.Matcher;

@@ -16,7 +16,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TimingLogger;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.ViewParent;
 import android.widget.TextViewHelper;
 
 import androidx.annotation.RequiresApi;
@@ -24,6 +26,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 
 import com.stardust.util.TextUtils;
 
+import org.autojs.autojs.ui.edit.EditorView;
 import org.autojs.autojs.ui.edit.theme.Theme;
 import org.autojs.autojs.ui.edit.theme.TokenMapping;
 import org.mozilla.javascript.Token;
@@ -553,5 +556,138 @@ public class CodeEditText extends AppCompatEditText {
         }
         invalidate();
 
+    }
+
+//    @Override
+//    public boolean dispatchKeyEvent(android.view.KeyEvent event) {
+//        EditorView editorView = findEditorView();
+//        if (editorView == null) {
+//            return super.dispatchKeyEvent(event);
+//        }
+//
+//        // 👇 找到真正拥有撤销重做的对象（核心）,用公开的 getEditor() 方法获取 CodeEditor
+//        CodeEditor codeEditor = editorView.getEditor();
+//
+//        // Ctrl+S 保存
+//        if (event.getAction() == KeyEvent.ACTION_DOWN &&
+//                event.isCtrlPressed() &&
+//                event.getKeyCode() == KeyEvent.KEYCODE_S) {
+//            post(editorView::saveFile);
+//            return true;
+//        }
+//
+//        // Ctrl+Z 撤销（安全判断）
+//        if (event.getAction() == KeyEvent.ACTION_DOWN &&
+//                event.isCtrlPressed() &&
+//                event.getKeyCode() == KeyEvent.KEYCODE_Z) {
+//            if (codeEditor.canUndo()) {
+//                codeEditor.undo();
+//            }
+//            return true;
+//        }
+//
+//        // Ctrl+Y 重做（安全判断）
+//        if (event.getAction() == KeyEvent.ACTION_DOWN &&
+//                event.isCtrlPressed() &&
+//                event.getKeyCode() == KeyEvent.KEYCODE_Y) {
+//            if (codeEditor.canRedo()) {
+//                codeEditor.redo();
+//            }
+//            return true;
+//        }
+//        if (event.isCtrlPressed() &&
+//                event.getAction() == KeyEvent.ACTION_DOWN &&
+//                event.getKeyCode() != KeyEvent.KEYCODE_S &&
+//                event.getKeyCode() != KeyEvent.KEYCODE_Z &&
+//                event.getKeyCode() != KeyEvent.KEYCODE_Y &&
+//                event.getKeyCode() != KeyEvent.KEYCODE_A &&
+//                event.getKeyCode() != KeyEvent.KEYCODE_C &&
+//                event.getKeyCode() != KeyEvent.KEYCODE_V &&
+//                event.getKeyCode() != KeyEvent.KEYCODE_X  ){
+//            return true;
+//        }
+//
+//        return super.dispatchKeyEvent(event);
+//    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        EditorView editorView = findEditorView();
+        if (editorView == null) {
+            return super.dispatchKeyEvent(event);
+        }
+
+        CodeEditor codeEditor = editorView.getEditor();
+
+        // 只处理按键按下事件
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return super.dispatchKeyEvent(event);
+        }
+
+        boolean isCtrlPressed = event.isCtrlPressed();
+        int keyCode = event.getKeyCode();
+
+        // Ctrl 组合键处理
+        if (isCtrlPressed) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_S:
+                    post(editorView::saveFile);
+                    return true;
+
+                case KeyEvent.KEYCODE_Z:
+                    if (codeEditor.canUndo()) {
+                        codeEditor.undo();
+                    }
+                    return true;
+
+                case KeyEvent.KEYCODE_Y:
+                    if (codeEditor.canRedo()) {
+                        codeEditor.redo();
+                    }
+                    return true;
+
+                case KeyEvent.KEYCODE_X:
+                    // Ctrl+X：没有选中内容 / 文本长度为0 → 拦截，不执行剪切
+                    // 获取选中的起点和终点
+                    int selStart = codeEditor.getCodeEditText().getSelectionStart();
+                    int selEnd = codeEditor.getCodeEditText().getSelectionEnd();
+
+                    // 如果没有选中文字，直接返回，不执行剪切
+                    if (selStart == selEnd) {
+                        return true;
+                    }
+                    break;
+
+                // 放行的编辑快捷键
+                case KeyEvent.KEYCODE_A:
+                    break;
+                case KeyEvent.KEYCODE_C:
+                  // Ctrl+C：没有选中就拦截
+                    int selStartC = codeEditor.getCodeEditText().getSelectionStart();
+                    int selEndC = codeEditor.getCodeEditText().getSelectionEnd();
+                    if (selStartC == selEndC) {
+                        return true;
+                    }
+                case KeyEvent.KEYCODE_V:
+                    break;
+
+                // 其他 Ctrl 组合键全部拦截
+                default:
+                    return true;
+            }
+        }
+
+        return super.dispatchKeyEvent(event);
+    }
+    // 👇 把这个辅助方法也加进去
+    private EditorView findEditorView() {
+        ViewParent parent = getParent();
+        while (parent != null) {
+            if (parent instanceof EditorView) {
+                return (EditorView) parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
     }
 }

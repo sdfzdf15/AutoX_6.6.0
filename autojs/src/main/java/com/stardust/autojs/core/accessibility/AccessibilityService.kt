@@ -4,7 +4,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.os.Build
 import com.stardust.autojs.core.pref.Pref
 import com.stardust.view.accessibility.AccessibilityService
-
+@Suppress("DEPRECATION")
 class AccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {

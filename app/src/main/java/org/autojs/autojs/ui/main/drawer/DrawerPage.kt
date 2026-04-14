@@ -3,9 +3,12 @@ package org.autojs.autojs.ui.main.drawer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AppOpsManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import android.widget.TextView
 import android.widget.Toast
@@ -25,11 +28,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.preference.PreferenceManager
 import coil.compose.rememberAsyncImagePainter
@@ -60,9 +65,10 @@ import org.autojs.autojs.ui.compose.widget.MyIcon
 import org.autojs.autojs.ui.compose.widget.MySwitch
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.settings.SettingsActivity
-import org.autojs.autoxjs.R
+import org.autojs.autoxjs.R  // <---- 这里修复了
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant
+
 
 private const val TAG = "DrawerPage"
 private const val URL_DEV_PLUGIN = "https://github.com/kkevsekk1/Auto.js-VSCode-Extension"
@@ -107,8 +113,18 @@ fun DrawerPage() {
             VolumeDownControlSwitch()
             AutoBackupSwitch()
 
+
+            IgnoreBatteryOptimizationSwitch()
+            Text(text = "自启动管理")
+            // 🔥 后台弹出界面（Android10+）
+            BackgroundPopupSwitch()
+            BootAutoStartSwitch()
+
+
             Text(text = stringResource(id = R.string.text_others))
             ConnectComputerSwitch()
+
+
             USBDebugSwitch()
 
             SwitchTimedTaskScheduler()
@@ -130,6 +146,328 @@ fun DrawerPage() {
                 .windowInsetsBottomHeight(WindowInsets.navigationBars)
         )
     }
+}
+
+@Composable
+fun IgnoreBatteryOptimizationSwitch() {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // 开关状态
+    val isIgnored = remember { mutableStateOf(false) }
+
+    // 刷新：读取系统真实权限
+    fun refreshBatteryState() {
+        isIgnored.value = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            pm.isIgnoringBatteryOptimizations(context.packageName)
+        } else {
+            false
+        }
+    }
+
+    // 页面初始化 & 返回时自动刷新
+    LaunchedEffect(Unit) {
+        refreshBatteryState()
+        lifecycleOwner.lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.RESUMED) {
+            refreshBatteryState()
+        }
+    }
+
+    SwitchItem(
+        icon = {
+            MyIcon(
+                painterResource(id = R.drawable.ic_debug),
+                null
+            )
+        },
+        text = { Text("忽略电池优化") },
+        checked = isIgnored.value,
+
+        // ==============================
+        // 🔥 你要的完整逻辑 在这里
+        // ==============================
+        onCheckedChange = { currentClickState: Boolean ->
+
+            // ==============================
+            // 情况1：开关原本是开启的（已忽略）===>手动关闭
+            // ==============================
+            if (!currentClickState) {
+                // 用户想关闭 → 跳设置界面
+                try {
+                    // 🔥 跳系统电池优化列表设置页面（不会弹框）
+                    val fallback = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    fallback.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(fallback)
+                } catch (e2: Exception) {
+                    Toast.makeText(context, "无法打开电池优化设置", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // ==============================
+            // 情况2：开关原本是关闭的（未忽略）===>手动开启
+            // ==============================
+            else {
+                // 用户想开启 → 弹出授权框
+                try {
+                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    intent.data = Uri.parse("package:${context.packageName}")
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(context, "无法打开电池优化设置", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    )
+}
+
+
+// ==============================
+// 🔥 后台弹出界面权限开关（最终版）
+// 功能：仅 Android 10+ 系统才需要申请，Android 5-9 自动允许
+// ==============================
+@Composable
+fun BackgroundPopupSwitch() {
+
+    // ========================
+    // 1. 获取上下文 & 生命周期
+    // ========================
+    // context：上下文，用于跳转系统设置、Toast、获取权限等
+    val context = LocalContext.current
+
+    // lifecycleOwner：页面生命周期（用于页面返回时自动刷新开关状态）
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // ========================
+    // 2. 权限检测方法
+    // 作用：检查当前 APP 是否拥有「后台弹出界面」权限
+    // ========================
+    fun hasBackgroundPopupPermission(): Boolean {
+        // ✅ 如果系统版本 < Android 10（API 29）
+        // 直接返回 true = 有权限（5-9 原生系统不需要这个权限） // Android 9 及以下直接返回 true = 有权限
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return true
+        }
+
+        // ✅ Android 10+ 开始检查厂商定制权限
+        return try {
+            // 获取系统权限管理服务
+            val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+
+            // 获取当前应用的 UID（唯一标识）
+            val uid = context.applicationInfo.uid
+
+            // 获取当前应用包名
+            val packageName = context.packageName
+
+            // 后台弹出界面 对应的 op 代码（小米/华为/OPPO/VIVO 通用）
+            val OP_BACKGROUND_START_ACTIVITY = 10021
+
+            // 通过反射调用系统隐藏方法 checkOpNoThrow
+            // 作用：检查是否允许后台启动Activity
+            val method = AppOpsManager::class.java.getMethod(
+                "checkOpNoThrow",       // 方法名
+                Int::class.javaPrimitiveType,  // 参数1：op 代码
+                Int::class.javaPrimitiveType,  // 参数2：uid
+                String::class.java             // 参数3：包名
+            )
+
+            // 执行方法，获取结果
+            val result =
+                method.invoke(appOps, OP_BACKGROUND_START_ACTIVITY, uid, packageName) as Int
+
+            // 返回权限状态：
+            // MODE_ALLOWED = 已允许
+            // MODE_ERRORED / MODE_IGNORED = 未允许
+            result == AppOpsManager.MODE_ALLOWED
+        } catch (e: Exception) {
+            // 异常处理：
+            // 1. 厂商没有这个权限
+            // 2. 方法被修改
+            // 出现异常 → 默认视为有权限，不影响使用
+            true
+        }
+    }
+
+    // ========================
+    // 3. 开关状态（从本地存储读取）
+    // 作用：记录开关是否开启，重启APP不丢失
+    // ========================
+    val isGranted = remember {
+        // 从 Pref 读取上次保存的状态
+        val isAndroid9OrLower = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
+        mutableStateOf(
+            if (isAndroid9OrLower) {
+                // 9及以下：永远是 true（开启）
+                true
+            } else {
+                // 10+：读取本地存储
+                Pref.isBackgroundPopupEnabled()
+            }
+        )
+    }
+
+    // ========================
+    // 4. 页面返回时自动刷新权限
+    // 作用：从设置页回来后，自动更新开关状态
+    // ========================
+    LaunchedEffect(Unit) {
+        // 仅 Android 10+ 才需要刷新
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // 监听页面生命周期：每次页面显示时执行
+            lifecycleOwner.lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.RESUMED) {
+                // 重新检查权限
+                val granted = hasBackgroundPopupPermission()
+
+                // 更新开关UI
+                isGranted.value = granted
+
+                // 保存到本地存储（永久记录）
+                Pref.setBackgroundPopupEnabled(granted)
+            }
+        }
+    }
+
+    // ========================
+    // 5. 渲染开关组件
+    // ========================
+    SwitchItem(
+        // 左侧图标：使用悬浮窗权限的图标
+        icon = {
+            MyIcon(painterResource(id = R.drawable.ic_overlay), null)
+        },
+
+        // 开关文字
+        text = { Text("后台弹出界面") },
+
+        // 开关是否开启
+        checked = isGranted.value,
+
+        // ========================
+        // 6. 用户点击开关时触发
+        // ========================
+        onCheckedChange = {
+            // ------------------------------
+            // 条件：Android 9 及以下
+            // 逻辑：不跳设置，提示无需开启
+            // ------------------------------
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                Toast.makeText(context, "Android 9及以下无法管此权限(默认开启)", Toast.LENGTH_SHORT)
+                    .show()
+                return@SwitchItem
+            }
+
+            // ------------------------------
+            // 条件：Android 10+
+            // 逻辑：跳转到对应手机品牌的权限设置页
+            // ------------------------------
+            try {
+                // 创建意图 Intent
+                val intent = Intent()
+
+                // 必须加：跨界面跳转需要新任务栈
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                // 根据不同品牌，跳转到不同权限页面
+                when {
+                    // 小米 / 红米
+                    Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true) -> {
+                        intent.component = ComponentName(
+                            "com.miui.securitycenter",
+                            "com.miui.permcenter.permissions.PermissionsEditorActivity"
+                        )
+                        // 传入当前包名，直接打开本APP的权限页
+                        intent.putExtra("extra_pkgname", context.packageName)
+                    }
+
+                    // 华为 / 荣耀
+                    Build.MANUFACTURER.equals("Huawei", ignoreCase = true) ||
+                            Build.MANUFACTURER.equals("Honor", ignoreCase = true) -> {
+                        intent.component = ComponentName(
+                            "com.huawei.systemmanager",
+                            "com.huawei.permissionmanager.ui.MainActivity"
+                        )
+                    }
+
+                    // OPPO
+                    Build.MANUFACTURER.equals("OPPO", ignoreCase = true) -> {
+                        intent.component = ComponentName(
+                            "com.coloros.safecenter",
+                            "com.coloros.safecenter.permission.singlepage.PermissionSinglePageActivity"
+                        )
+                        intent.putExtra("packageName", context.packageName)
+                    }
+
+                    // VIVO
+                    Build.MANUFACTURER.equals("VIVO", ignoreCase = true) -> {
+                        intent.component = ComponentName(
+                            "com.vivo.permissionmanager",
+                            "com.vivo.permissionmanager.activity.PurviewActivity"
+                        )
+                        intent.putExtra("packagename", context.packageName)
+                    }
+
+                    // 其他品牌：直接跳应用详情页
+                    else -> {
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        intent.data = Uri.parse("package:${context.packageName}")
+                    }
+                }
+
+                // 执行跳转
+                context.startActivity(intent)
+
+                // 提示用户开启权限
+                Toast.makeText(context, "请开启：后台弹出界面 / 后台显示悬浮窗", Toast.LENGTH_LONG)
+                    .show()
+            } catch (e: Exception) {
+                // ------------------------------
+                // 跳转失败 → 兜底方案：跳应用详情
+                // ------------------------------
+                val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(fallback)
+                Toast.makeText(context, "请手动开启「后台弹出界面」权限", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+}
+
+
+@Composable
+fun BootAutoStartSwitch() {
+    val context = LocalContext.current
+    var enabled by remember {
+        mutableStateOf(Pref.isBootAutoStartEnabled())
+    }
+
+    SwitchItem(
+        icon = {
+            MyIcon(
+                painterResource(id = R.drawable.ic_debug),
+                null
+            )
+        },
+        text = { Text(text = "开机自启") },
+        checked = enabled,
+        onCheckedChange = { checked ->
+            enabled = checked
+            Pref.setBootAutoStartEnabled(checked)
+
+            if (checked) {
+                // 你要的完整提示文案
+                Toast.makeText(
+                    context,
+                    "开机自启已打开，同时需要权限：自启动 + 前台服务 + 后台弹出界面",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(context, "已关闭开机自启", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
 }
 
 @Composable
@@ -242,9 +580,7 @@ private fun CheckForUpdate(model: DrawerViewModel = viewModel()) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showDialog = false
-                }) {
+                TextButton(onClick = { showDialog = false }) {
                     Text(text = stringResource(id = R.string.text_cancel))
                 }
             },
@@ -384,6 +720,7 @@ private fun ConnectComputerSwitch() {
                         ).show()
                     }
                 }
+
                 QRResult.QRUserCanceled -> {}
                 QRResult.QRMissingPermission -> {}
                 is QRResult.QRError -> {}

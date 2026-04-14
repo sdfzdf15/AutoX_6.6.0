@@ -63,22 +63,19 @@ class AssetAndUrlModuleSourceProvider(
 
     //子模块以相对路径加载时调用此方法
     override fun loadFromUri(uri: URI, base: URI?, validator: Any?): ModuleSource? {
-        var uri = uri
-        if (uri.scheme == null) uri = File(uri.path).toURI()
-        //println("加载模块：$uri")
-        if (uri.scheme == "http" || uri.scheme == "https") {
-            return loadFromHttp(uri, base, validator)
+        var newUri = uri
+        if (newUri.scheme == null) newUri = File(newUri.path).toURI()
+        if (newUri.scheme == "http" || newUri.scheme == "https") {
+            return loadFromHttp(newUri, base, validator)
         }
-        val moduleSource = loadAt(uri, base, validator) ?: loadAt(
-            File(uri.path + ".js").toURI(), base, validator
+        val moduleSource = loadAt(newUri, base, validator) ?: loadAt(
+            File(newUri.path + ".js").toURI(), base, validator
         )
         if (moduleSource != null) {
             return moduleSource
         }
-        //尝试从目录加载
-        //尝试读取package.json指定的文件
         val mainFile: URI? = try {
-            val packageFile = File(uri.path, "package.json")
+            val packageFile = File(newUri.path, "package.json")
             val json = Gson().fromJson<Map<String, Any>>(
                 InputStreamReader(packageFile.inputStream()),
                 Map::class.java
@@ -89,9 +86,8 @@ class AssetAndUrlModuleSourceProvider(
             null
         }
         mainFile?.let {
-            //若package.json中main入口读取成功则重新执行模块加载
-            return loadFromUri(it,uri,validator)
-        }?: return loadAt(File(uri.path, "index.js").toURI(),uri,validator)
+            return loadFromUri(it, newUri, validator)
+        }?: return loadAt(File(newUri.path, "index.js").toURI(), newUri, validator)
     }
 
     private fun loadAt(uri: URI, base: URI?, validator: Any?): ModuleSource? {

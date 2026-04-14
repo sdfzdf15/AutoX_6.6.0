@@ -81,7 +81,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
     private fun doExecution() {
         mScriptEngine.setTag(ScriptEngine.TAG_SOURCE, mScriptSource)
         mExecutionListener!!.onStart(mScriptExecution)
-        (mScriptEngine as LoopBasedJavaScriptEngine?)!!.execute(
+        (mScriptEngine as LoopBasedJavaScriptEngine).execute(
             mScriptSource,
             object : ExecuteCallback {
                 override fun onResult(r: Any) {
@@ -97,7 +97,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
     private fun prepare() {
         mScriptEngine.put("activity", this)
         mScriptEngine.setTag("activity", this)
-        mScriptEngine.setTag(ScriptEngine.TAG_ENV_PATH, mScriptExecution!!.config.path)
+        mScriptEngine.setTag(ScriptEngine.TAG_ENV_PATH, mScriptExecution.config.path)
         mScriptEngine.setTag(
             ScriptEngine.TAG_WORKING_DIRECTORY,
             mScriptExecution.config.workingDirectory
@@ -136,12 +136,18 @@ class ScriptExecuteActivity : AppCompatActivity() {
     }
 
     @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         val event = SimpleEvent()
         emit("back_pressed", event)
         if (!event.consumed) {
-            super.onBackPressed()
+            callSuperOnBackPressed()
         }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun callSuperOnBackPressed() {
+        super.onBackPressed()
     }
 
     override fun onPause() {
@@ -174,7 +180,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
         emit("generic_motion_event", event, e)
         return super.onGenericMotionEvent(event)
     }
-
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         emit("activity_result", requestCode, resultCode, data)

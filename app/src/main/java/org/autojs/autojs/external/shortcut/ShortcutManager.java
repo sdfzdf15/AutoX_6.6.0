@@ -12,6 +12,7 @@ import androidx.annotation.RequiresApi;
 import java.util.Collections;
 import java.util.List;
 
+
 /**
  * Created by Stardust on 2017/10/25.
  */
@@ -46,7 +47,7 @@ public class ShortcutManager {
         ShortcutInfo shortcut = buildShortcutInfo(label, id, icon, intent);
         int req = getRequestCode(id);
         PendingIntent successCallback = PendingIntent.getBroadcast(mContext, req,
-                mShortcutManager.createShortcutResultIntent(shortcut), 0);
+                mShortcutManager.createShortcutResultIntent(shortcut), PendingIntent.FLAG_IMMUTABLE);
         mShortcutManager.requestPinShortcut(shortcut, successCallback.getIntentSender());
     }
 

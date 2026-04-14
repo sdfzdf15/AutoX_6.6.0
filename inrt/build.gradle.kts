@@ -16,6 +16,10 @@ if (propFile.exists()) {
 
 android {
     compileSdk = versions.compile
+    // 👇 就加在这里！
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         applicationId = "org.autojs.autoxjs.inrt"
         minSdk = versions.mini

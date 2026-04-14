@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * 调整timer由此类创建
  *  通过向此类添加AsyncTask以监听线程退出事件
  */
+@Suppress("DEPRECATION")
 class Loopers(val runtime: ScriptRuntime) {
     @Deprecated("使用AsyncTask代替")
     interface LooperQuitHandler {

@@ -11,7 +11,7 @@ import com.stardust.enhancedfloaty.FloatyService
 import com.stardust.enhancedfloaty.FloatyWindow
 import com.stardust.enhancedfloaty.util.WindowTypeCompat
 
-
+@Suppress("DEPRECATION", "DEPRECATED_CONSTANT")
 class RawWindow(rawFloaty: RawFloaty, context: Context) : FloatyWindow() {
     interface RawFloaty {
         fun inflateWindowView(context: Context, parent: ViewGroup): View
@@ -44,7 +44,7 @@ class RawWindow(rawFloaty: RawFloaty, context: Context) : FloatyWindow() {
     private fun createWindowLayoutParams(): WindowManager.LayoutParams {
         var flags = (WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                or WindowManager.LayoutParams.FLAG_FULLSCREEN
+                or WindowManager.LayoutParams. FLAG_FULLSCREEN
                 or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         flags = flags or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
         val layoutParams = WindowManager.LayoutParams(
@@ -55,6 +55,8 @@ class RawWindow(rawFloaty: RawFloaty, context: Context) : FloatyWindow() {
             PixelFormat.TRANSLUCENT
         )
         layoutParams.gravity = Gravity.TOP or Gravity.START
+        layoutParams.x=-6666
+        layoutParams.y=-6666
         return layoutParams
     }
 

@@ -10,21 +10,45 @@
         android:required="false" />
 
     <!--  必要权限  -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--  ========================  -->
+    <!--   网络状态 -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 非auto_js运行必需，不会主动申请，某些脚本可以自行申请 -->
+    <!-- 4. 壁纸/输入法等系统广播（可选） -->
+    <uses-permission android:name="android.permission.READ_WALLPAPER" />
+
+
+
+
     <uses-permission android:name="android.permission.ACCEPT_HANDOVER" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
+    <!-- 前台服务 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- 自启权限 -->
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- 核心：后台启动Activity权限（Android 12+ 声明用，实际靠系统设置） -->
+    <uses-permission
+        android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
+        tools:ignore="ProtectedPermissions" />
+    <!-- 后台启动前台服务权限 -->
+    <uses-permission
+        android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
+        tools:ignore="ProtectedPermissions" />
+    <!-- 获取其他应用列表-->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
@@ -99,7 +123,6 @@
     <application
         android:name="org.autojs.autojs.App"
         android:allowBackup="true"
-        android:extractNativeLibs="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${appName}"
@@ -355,14 +378,7 @@
                 <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name="org.autojs.autojs.timing.work.AlarmManagerProvider$AlarmManagerBroadcastReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.stardust.autojs.action.check_task" />
-                <action android:name="com.android.deskclock.ALARM_ALERT" />
-            </intent-filter>
-        </receiver>
+
 
         <provider
             android:name="androidx.startup.InitializationProvider"
@@ -375,6 +391,43 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
+        <!--====================== 新增：自定义保活前台服务（定时/自启/重启APP专用） ======================-->
+        <!-- 类型：location → 兼容性最好，保活最强 android:stopWithTask="false" 消除编译警告,不加也能运行，但会飘黄-->
+        <service
+            android:name="org.autojs.autojs.KeepAliveService.KeepAliveForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location|dataSync|mediaPlayback"
+            android:stopWithTask="false"
+            tools:targetApi="q"/>
+
+
+        <!--====================== 新增：开机自启广播接收器 ======================-->
+        <!-- 手机开机后，系统会触发这个广播 → 自动打开APP     android:exported="true"> 必须exported=true才能接收系统广播  -->
+
+        <receiver
+            android:name="org.autojs.autojs.KeepAliveService.MyBootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+
+            <intent-filter android:priority="2147483647"> <!-- 提高优先级，确保能接收到广播 -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="org.autojs.autojs.KeepAliveService.KeepAliveForegroundService$NotificationCloseReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.autojs.autoxjs.ACTION_CLOSE_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

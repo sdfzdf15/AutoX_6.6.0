@@ -336,6 +336,23 @@
             android:name="com.google.mlkit.common.internal.MlKitInitProvider"
             android:authorities="${applicationId}.mlkitinitprovider"
             tools:node="remove" />
+        <!--====================== 新增：开机自启广播接收器 ======================-->
+        <!-- 手机开机后，系统会触发这个广播 → 自动打开APP     android:exported="true"> 必须exported=true才能接收系统广播  -->
+
+        <receiver
+            android:name="com.stardust.auojs.inrt.KeepAliveService.MyBootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="true">
+
+            <intent-filter android:priority="2147483647"> <!-- 提高优先级，确保能接收到广播 -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
