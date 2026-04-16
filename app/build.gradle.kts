@@ -7,7 +7,6 @@ import java.util.zip.ZipInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.jakewharton.butterknife")
     id("kotlin-kapt")
 }
 
@@ -174,7 +173,7 @@ android {
 
 dependencies {
     val AAVersion = "4.5.2"
-
+    implementation("org.nanohttpd:nanohttpd:2.3.1")
     implementation(platform(libs.compose.bom))
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
@@ -196,14 +195,14 @@ dependencies {
     // Kotlin携程
     implementation(libs.kotlinx.coroutines.android)
     // Android Annotations
-    annotationProcessor("org.androidannotations:androidannotations:$AAVersion")
+
     kapt("org.androidannotations:androidannotations:$AAVersion")
-    //noinspection GradleDependency
     implementation("org.androidannotations:androidannotations-api:$AAVersion")
-    // ButterKnife
-    implementation("com.jakewharton:butterknife:10.2.1")
-    annotationProcessor("com.jakewharton:butterknife-compiler:10.2.3")
+
+
+    implementation("com.jakewharton:butterknife:10.2.3")
     kapt("com.jakewharton:butterknife-compiler:10.2.3")
+
     // Android supports
     implementation(libs.preference.ktx)
     implementation(libs.appcompat) //
@@ -250,7 +249,7 @@ dependencies {
     //Glide
     implementation("com.github.bumptech.glide:glide:4.8.0")
     kapt("com.github.bumptech.glide:compiler:4.12.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
     //joda time
     implementation("net.danlew:android.joda:2.10.14")
     // Tasker Plugin

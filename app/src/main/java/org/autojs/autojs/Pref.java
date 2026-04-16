@@ -8,6 +8,7 @@ import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.runtime.accessibility.AccessibilityConfig;
 
 import org.autojs.autojs.autojs.key.GlobalKeyObserver;
+import org.autojs.autojs.ui.main.web.DocumentSource;
 import org.autojs.autoxjs.R;
 
 import java.io.File;
@@ -178,7 +179,8 @@ public class Pref {
 
     public static String getDocumentationUrl() {
 //        String docSource = def().getString(getString(R.string.key_documentation_source), null);
-        return "https://autoxjs.dayudada.com/";
+       // return "https://autoxjs.dayudada.com/";
+        return DocumentSource.DOC_V2_LOCAL.getUri();
     }
 
     public static boolean isFloatingMenuShown() {

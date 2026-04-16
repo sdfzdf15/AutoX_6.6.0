@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.autojs.autoxjs.R;
@@ -148,11 +147,13 @@ public class FunctionsKeyboardView extends FrameLayout {
         mSpanSizes.put(module, spanSizes);
     }
 
+/*
     private String getDisplayText(Property property) {
         if (TextUtils.isEmpty(property.getSummary()))
             return property.getKey();
         return property.getKey() + "\n" + property.getSummary();
     }
+*/
 
     private int getTextWidth(String text) {
         if (mPaint == null) {
@@ -165,7 +166,7 @@ public class FunctionsKeyboardView extends FrameLayout {
     }
 
     private void initModulesView() {
-        mModulesView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false));
+        mModulesView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
         mModulesView.setAdapter(new ModulesAdapter());
     }
 
@@ -237,7 +238,7 @@ public class FunctionsKeyboardView extends FrameLayout {
     }
 
 
-    private class PropertyViewHolder extends RecyclerView.ViewHolder {
+  /*  private class PropertyViewHolder extends RecyclerView.ViewHolder {
 
         private TextView mTextView;
         private Property mProperty;
@@ -263,8 +264,51 @@ public class FunctionsKeyboardView extends FrameLayout {
             mProperty = property;
             mTextView.setText(getDisplayText(property));
         }
-    }
+    }*/
 
+    private class PropertyViewHolder extends RecyclerView.ViewHolder {
+
+        // 修正变量名，确保与布局ID和下方findViewById对应
+        private TextView mNameText;
+        private TextView mSummaryText;
+        private Property mProperty;
+
+        PropertyViewHolder(View itemView) {
+            super(itemView);
+            // 1. 修正：正确绑定两个TextView控件
+            mNameText = itemView.findViewById(R.id.property_name);
+            mSummaryText = itemView.findViewById(R.id.property_summary);
+
+            // 2. 修正：点击事件的View对象改为当前控件
+            itemView.setOnLongClickListener(v -> {
+                if (mClickCallback != null) {
+                    mClickCallback.onPropertyLongClick(mSelectedModule, mProperty);
+                    return true;
+                }
+                return false;
+            });
+
+            itemView.setOnClickListener(v -> {
+                if (mClickCallback != null) {
+                    mClickCallback.onPropertyClick(mSelectedModule, mProperty);
+                }
+            });
+        }
+
+        void bind(Property property) {
+            mProperty = property;
+            // 3. 修正：分别给两个TextView赋值
+            mNameText.setText(property.getKey());
+
+            // 处理描述文本（显示/隐藏逻辑）
+            if (!TextUtils.isEmpty(property.getSummary())) {
+                mSummaryText.setText(property.getSummary());
+                mSummaryText.setVisibility(View.VISIBLE);
+            } else {
+                mSummaryText.setVisibility(View.GONE);
+            }
+        }
+    }
     private class ModulesAdapter extends RecyclerView.Adapter<ModuleViewHolder> {
 
         @Override

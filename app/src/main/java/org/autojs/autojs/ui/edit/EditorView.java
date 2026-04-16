@@ -12,18 +12,17 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -47,6 +46,8 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EViewGroup;
 import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.Pref;
+import org.autojs.autojs.ui.main.web.DocumentSource;
+import org.autojs.autojs.ui.main.web.EditorAppManager;
 import org.autojs.autoxjs.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.model.autocomplete.AutoCompletion;
@@ -273,13 +274,35 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         setUpInputMethodEnhancedBar();
         setUpFunctionsKeyboard();
         setMenuItemStatus(R.id.save, false);
-        if (mDocsWebView.getIsTbs()) {
+       /* if (mDocsWebView.getIsTbs()) {
             mDocsWebView.getWebViewTbs().getSettings().setDisplayZoomControls(true);
             mDocsWebView.getWebViewTbs().loadUrl(Pref.getDocumentationUrl() + "index.html");
         } else {
             mDocsWebView.getWebView().getSettings().setDisplayZoomControls(true);
             mDocsWebView.getWebView().loadUrl(Pref.getDocumentationUrl() + "index.html");
+        }*/
+        // 核心：读取保存的文档源，自动加载对应文档
+        // 核心：读取保存的文档源，自动加载对应文档
+
+
+
+        // 核心：读取保存的文档源，自动加载对应文档
+        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
+        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
+        DocumentSource source;
+        try {
+            source = DocumentSource.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            source = DocumentSource.DOC_V1; // 读取失败默认本地文档1
         }
+
+        // 复用 switchDocument 逻辑，自动加载（统一用原生WebView，TBS自动兼容）
+        EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
+
+
+
+
+
         Themes.getCurrent(getContext())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::setTheme);
@@ -665,31 +688,63 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
             return;
         }
         if (completion.getUrl() == null) return;
-        showManual(completion.getUrl(), completion.getHint());
+
+        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
+        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
+        DocumentSource source;
+        try {
+            source = DocumentSource.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            source = DocumentSource.DOC_V1;
+        }
+
+        String url = completion.getUrl();
+        String finalUrl;
+        if (source.isLocal()) {
+            EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
+            finalUrl = "http://localhost:8080/" + url;
+        } else {
+            finalUrl = source.getUri()+ url;
+        }
+
+        showManual(finalUrl, completion.getHint());
     }
 
-    private void showManual(String url, String title) {
-        String absUrl = Pref.getDocumentationUrl() + url;
-        new ManualDialog(getContext())
-                .title(title)
-                .url(absUrl)
-                .pinToLeft(v -> {
-                    if (mDocsWebView.getIsTbs()) {
-                        mDocsWebView.getWebViewTbs().loadUrl(absUrl);
-                        mDrawerLayout.openDrawer(GravityCompat.START);
-                    } else {
-                        mDocsWebView.getWebView().loadUrl(absUrl);
-                        mDrawerLayout.openDrawer(GravityCompat.START);
-                    }
-                })
-                .show();
-    }
 
-    @Override
-    public void onModuleLongClick(Module module) {
-        showManual(module.getUrl(), module.getName());
-    }
+  private void showManual(String absUrl, String title) {
+      // 不再拼接！直接使用传进来的完整地址！
+      new ManualDialog(getContext())
+              .title(title)
+              .url(absUrl)
+              .pinToLeft(v -> {
+                  mDocsWebView.getWebView().loadUrl(absUrl);
+                  mDrawerLayout.openDrawer(GravityCompat.START);
+              })
+              .show();
+  }
 
+   @Override
+   public void onModuleLongClick(Module module) {
+       SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
+       String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
+       DocumentSource source;
+       try {
+           source = DocumentSource.valueOf(name);
+       } catch (IllegalArgumentException e) {
+           source = DocumentSource.DOC_V1;
+       }
+
+       String url = module.getUrl();
+       String finalUrl;
+       if (source.isLocal()) {
+           EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
+           finalUrl = "http://localhost:8080/" + url;
+       } else {
+           finalUrl = source.getUri()+ url;
+       }
+
+       showManual(finalUrl, module.getName());
+   }
     @Override
     public void onPropertyClick(Module m, Property property) {
         String p = property.getKey();
@@ -709,11 +764,42 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
     @Override
     public void onPropertyLongClick(Module m, Property property) {
-        if (TextUtils.isEmpty(property.getUrl())) {
-            showManual(m.getUrl(), property.getKey());
-        } else {
-            showManual(property.getUrl(), property.getKey());
+
+        // 1. 读取保存的文档源（在线/本地/本地2）
+        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
+        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
+        DocumentSource source;
+        try {
+            source = DocumentSource.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            source = DocumentSource.DOC_V1; // 兜底默认本地文档1
         }
+
+        // 2. 完全保留你原有的url判断逻辑
+        String url;
+        if (TextUtils.isEmpty(property.getUrl())) {
+            url = m.getUrl();
+        } else {
+            url = property.getUrl();
+        }
+
+        // 3. 核心修复：根据文档源，正确拼接最终地址 + 启动服务器
+        String finalUrl;
+        if (source.isLocal()) {
+            // 本地文档：先复用switchDocument启动服务器，再拼接相对路径
+            EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
+            finalUrl = "http://localhost:8080/" + url;
+        } else {
+            // 在线文档：在线地址
+            finalUrl = source.getUri()+ url;
+        }
+
+        // 4. 打开文档
+        showManual(finalUrl, property.getKey());
+
+
+
+
     }
 
     public int getScriptExecutionId() {

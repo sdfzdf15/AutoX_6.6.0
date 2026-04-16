@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stardust.util.IntentUtil
 import org.autojs.autojs.ui.log.LogActivityKt
+import org.autojs.autojs.ui.main.web.CustomOnlineUrlDialog
 import org.autojs.autojs.ui.main.web.DocumentSourceSelectDialog
 import org.autojs.autojs.ui.main.web.EditorAppManager.Companion.loadHomeDocument
 import org.autojs.autoxjs.R
@@ -81,6 +83,13 @@ fun DocumentPageMenuButton(getWebView: () -> WebView) {
             }) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
                 Text(text = "刷新")
+            }
+            DropdownMenuItem(onClick = {
+                dismissMenu()
+                CustomOnlineUrlDialog(getWebView()).show()
+            }) {
+                    Icon(imageVector = Icons.Default.Settings, contentDescription = null)
+                    Text(text = "自定义在线文档")
             }
             DropdownMenuItem(onClick = {
                 dismissMenu()
