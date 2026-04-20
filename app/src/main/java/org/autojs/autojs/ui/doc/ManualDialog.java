@@ -4,7 +4,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -43,6 +46,26 @@ public class ManualDialog {
                 .customView(view, false)
                 .build();
         mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        // ========== 核心：在这里加定位修正 ==========
+        WebView webView = mEWebView.getWebView();
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                Uri uri = Uri.parse(url);
+                String targetId = uri.getQueryParameter("id");
+                if (targetId != null && !targetId.isEmpty()) {
+                    view.postDelayed(() -> {
+                        String js = "(function(){" +
+                                "var elem = document.getElementById('" + targetId + "');" +
+                                "if(elem) elem.scrollIntoView({block:'start'});" +
+                                "})()";
+                        view.evaluateJavascript(js, null);
+                    }, 200);
+                }
+            }
+        });
+
     }
 
 

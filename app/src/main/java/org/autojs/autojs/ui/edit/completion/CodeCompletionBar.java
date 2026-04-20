@@ -9,7 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.stardust.autojs.workground.WrapContentLinearLayoutManager;
+
+import com.google.android.flexbox.FlexboxLayoutManager;
 
 import org.autojs.autoxjs.R;
 import org.autojs.autojs.model.autocomplete.CodeCompletions;
@@ -95,7 +96,7 @@ public class CodeCompletionBar extends RecyclerView {
 
     private void init() {
         setAdapter(new CodeCompletionAdapter());
-        setLayoutManager(new WrapContentLinearLayoutManager(getContext(), HORIZONTAL, false));
+        setLayoutManager(new FlexboxLayoutManager(getContext()));
     }
 
     private class CodeCompletionAdapter extends Adapter<ViewHolder> {

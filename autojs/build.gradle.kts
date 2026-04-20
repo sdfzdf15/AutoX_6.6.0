@@ -46,6 +46,9 @@ dependencies {
     implementation(libs.documentfile)
     implementation(libs.preference.ktx)
     implementation(project(":common"))  // <-- 加这一行
+
+
+
     // 加上这句！
     // implementation("org.mozilla:rhino:1.7.15")
     api(libs.eventbus)
@@ -77,8 +80,12 @@ dependencies {
     api(project(":paddleocr"))
     // libs
     api(fileTree("../app/libs"){include("dx.jar", "rhino-1.7.14-jdk7.jar")})
+
     //api(fileTree("../app/libs"){include("dx.jar", "rhino-1.7.15.jar")})
     //api(fileTree(mapOf("dir" to "../app/libs", "include" to listOf("dx.jar", "rhino-1.7.15.jar"))))
+
+
+
 
     api("cz.adaptech:tesseract4android:4.1.1")
     api("com.google.mlkit:text-recognition:16.0.0-beta5")

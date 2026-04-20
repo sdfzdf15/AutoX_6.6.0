@@ -20,7 +20,6 @@ public class Module {
     private String mName;
     @SerializedName("summary")
     private String mSummary;
-
     public List<Property> getProperties() {
         return mProperties;
     }
@@ -52,6 +51,8 @@ public class Module {
     public void setSummary(String summary) {
         mSummary = summary;
     }
+
+
 
     public Property asGlobalProperty() {
         return new Property(mName, mUrl, mSummary, true);

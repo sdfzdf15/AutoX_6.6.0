@@ -14,13 +14,15 @@
         "key": "currentPackage",
         "url": "#/globals?id=currentpackage",
         "summary": "当前包名",
-        "global": true
+        "global": true,
+        "stationary": true
       },
       {
         "key": "currentActivity",
         "url": "#/globals?id=currentactivity",
         "summary": "当前活动",
-        "global": true
+        "global": true,
+        "stationary": true
       },
       {
         "key": "setClip",
@@ -32,7 +34,8 @@
         "key": "getClip",
         "url": "#/globals?id=getclip",
         "summary": "获取剪贴板",
-        "global": true
+        "global": true,
+        "stationary": true
       },
       {
         "key": "toast",
@@ -57,104 +60,201 @@
         "url": "#/globals?id=waitforpackagepackage-period-200",
         "summary": "等待包名",
         "global": true
-      },{
+      },
+      {
         "key": "exit",
         "url": "#/globals?id=exit",
         "summary": "退出",
-        "global": true
+        "global": true,
+        "stationary": true
       },
       {
         "key": "random",
         "url": "#/globals?id=randommin-max",
-        "summary": "随机数",
+        "summary": "随机数(min...max)之间",
+        "global": true
+      },
+      {
+        "key": "random",
+        "url": "#/globals?id=random",
+        "summary": "随机数[0, 1)之间",
+        "global": true,
+        "stationary": true
+      },
+      {
+        "key": "requiresApi",
+        "url": "#/globals?id=requiresapiapi",
+        "summary": "此脚本需要Android API版本才能运行",
+        "global": true
+      },
+      {
+        "key": "requiresAutojsVersion",
+        "url": "#/globals?id=requiresautojsversionversion",
+        "summary": "此脚本需要AutoJS版本才能运行",
         "global": true
       },
       {
         "key": "context",
         "url": "#/globals?id=context",
-        "summary": "",
+        "summary": "上下文对象",
         "global": true,
         "variable": true
       }
     ]
   },
   {
+    "name": "runtime",
+    "url": "#/globals?id=runtimerequestpermissionspermissions",
+    "summary": "运行时",
+    "properties": [
+      {
+        "key": "requestPermissions",
+        "url": "#/globals?id=runtimerequestpermissionspermissions",
+        "summary": "请求权限"
+      },
+      {
+        "key": "loadJar",
+        "url": "#/globals?id=runtimeloadjarpath",
+        "summary": "加载目标jar文件"
+      },
+      {
+        "key": "loadDex",
+        "url": "#/globals?id=runtimeloaddexpath",
+        "summary": "加载目标dex文件"
+      }
+    ]
+  },
+
+  {
     "name": "app",
     "url": "#/app",
     "summary": "应用",
     "properties": [
       {
-        "key": "uninstall",
-        "url": "#/app?id=appuninstall-packagename",
-        "summary": "卸载"
+        "key": "versionCode",
+        "url": "#/app?id=appversioncode",
+        "summary": "当前软件版本号(整数值)",
+        "variable": true
       },
       {
-        "key": "viewFile",
-        "url": "#/app?id=appviewfile-path",
-        "summary": "查看文件"
+        "key": "versionName",
+        "url": "#/app?id=appversionname",
+        "summary": "当前软件版本名称(例如\"3.0.0 Beta\")",
+        "variable": true
       },
       {
-        "key": "editFile",
-        "url": "#/app?id=appeditfile-path",
-        "summary": "编辑文件"
+        "key": "autojs.versionCode",
+        "url": "#/app?id=appautojsversioncode",
+        "summary": "Auto.js版本号(整数值)",
+        "variable": true
       },
       {
-        "key": "openUrl",
-        "url": "#/app?id=appopenurl-url",
-        "summary": "打开链接"
-      },
-      {
-        "key": "launchPackage",
-        "url": "#/app?id=applaunchpackage-packagename",
-        "summary": "启动包名"
-      },
-      {
-        "key": "launch",
-        "url": "#/app?id=applaunch-packagename",
-        "summary": "启动",
-        "global": true
+        "key": "autojs.versionName",
+        "url": "#/app?id=appautojsversionname",
+        "summary": "Auto.js版本名称(例如\"6.6.0\")",
+        "variable": true
       },
       {
         "key": "launchApp",
-        "url": "#/app?id=applaunchapp-appname",
-        "summary": "启动应用",
-        "global": true
+        "url": "#/app?id=applaunchappappname",
+        "summary": "通过应用名称启动应用"
+      },
+      {
+        "key": "launch",
+        "url": "#/app?id=applaunchpackagename",
+        "summary": "通过应用包名启动应用"
+      },
+      {
+        "key": "launchPackage",
+        "url": "#/app?id=applaunchpackagepackagename",
+        "summary": "通过应用名称启动应用"
       },
       {
         "key": "getPackageName",
-        "url": "#/globals?id=getpackagename-appname",
-        "summary": "获取包名"
+        "url": "#/app?id=appgetpackagenameappname",
+        "summary": "通过应用名称获取包名"
       },
       {
         "key": "getAppName",
-        "url": "#/app?id=appgetappname-packagename",
-        "summary": "获取应用名"
+        "url": "#/app?id=appgetappnamepackagename",
+        "summary": "通过包名获取应用名称"
       },
       {
         "key": "openAppSetting",
-        "url": "#/app?id=appopenappsetting-packagename",
-        "summary": "应用设置页"
+        "url": "#/app?id=appopenappsettingpackagename",
+        "summary": "打开应用设置详情页"
+      },
+      {
+        "key": "viewFile",
+        "url": "#/app?id=appviewfilepath",
+        "summary": "用其他应用查看文件"
+      },
+      {
+        "key": "editFile",
+        "url": "#/app?id=appeditfilepath",
+        "summary": "用其他应用编辑文件"
+      },
+      {
+        "key": "uninstall",
+        "url": "#/app?id=appuninstallpackagename",
+        "summary": "通过包名卸载应用"
+      },
+      {
+        "key": "openUrl",
+        "url": "#/app?id=appopenurlurl",
+        "summary": "用浏览器打开URL"
       },
       {
         "key": "sendEmail",
-        "url": "#/app?id=appsendemail-options",
+        "url": "#/app?id=appsendemailoptions",
         "summary": "发送邮件"
       },
       {
+        "key": "startActivity",
+        "url": "#/app?id=appstartactivityname",
+        "summary": "启动Auto.js的特定界面"
+      },
+      {
         "key": "intent",
-        "url": "#/app?id=appintent-options",
-        "summary": "意图"
+        "url": "#/app?id=appintentoptions",
+        "summary": "构造一个意图Intent对象"
       },
       {
         "key": "startActivity",
-        "url": "#/app?id=appstartactivity-options",
-        "summary": "启动活动"
+        "url": "#/app?id=appstartactivityoptions",
+        "summary": "启动Activity"
       },
       {
         "key": "sendBroadcast",
-        "url": "#/app?id=appsendbroadcast-options",
-        "summary": "发送广播"
+        "url": "#/app?id=appsendbroadcastoptions",
+        "summary": "发送广播消息"
+      },
+      {
+        "key": "startService",
+        "url": "#/app?id=appstartserviceoptions",
+        "summary": "启动服务"
+      },
+      {
+        "key": "sendBroadcast",
+        "url": "#/app?id=appsendbroadcastname",
+        "summary": "发送广播消息"
+      },
+      {
+        "key": "intentToShell",
+        "url": "#/app?id=appintenttoshelloptions",
+        "summary": "将意图发送到系统shell"
+      },
+      {
+        "key": "parseUri",
+        "url": "#/app?id=appparseuriuri",
+        "summary": "解析URI字符串"
+      },
+      {
+        "key": "getUriForFile",
+        "url": "#/app?id=appgeturiforfilepath",
+        "summary": "获取文件URI的URI字符串"
       }
+
     ]
   },
   {
@@ -243,69 +343,121 @@
     "properties": [
       {
         "key": "show",
-        "url": "#/console?id=consoleshow",
+        "url": "#/console?id=consoleshowautohide",
         "summary": "显示"
       },
       {
         "key": "hide",
         "url": "#/console?id=consolehide",
-        "summary": "隐藏"
+        "summary": "隐藏",
+        "stationary":  true
       },
       {
         "key": "clear",
         "url": "#/console?id=consoleclear",
-        "summary": "清空"
-      },
-      {
-        "key": "verbose",
-        "url": "#/console?id=consoleverbose-data-args",
-        "summary": "不重要日志"
-      },
-      {
-        "key": "info",
-        "url": "#/console?id=consoleinfo-data-args",
-        "summary": "打印信息"
+        "summary": "清空",
+        "stationary":  true
       },
       {
         "key": "log",
-        "url": "#/console?id=consolelog-data-args",
+        "url": "#/console?id=consolelogdata-args",
         "summary": "打印日志",
         "global": true
       },
       {
+        "key": "verbose",
+        "url": "#/console?id=consoleverbosedata-args",
+        "summary": "不重要日志"
+      },
+      {
+        "key": "info",
+        "url": "#/console?id=consoleinfodata-args",
+        "summary": "打印信息"
+      },
+      {
         "key": "warn",
-        "url": "#/console?id=consolewarn-data-args",
+        "url": "#/console?id=consolewarndata-args",
         "summary": "打印警告"
       },
       {
         "key": "error",
-        "url": "#/console?id=consoleerror-data-args",
+        "url": "#/console?id=consoleerrordata-args",
         "summary": "打印错误"
       },
       {
         "key": "assert",
-        "url": "#/console?id=consoleassert-value-message",
+        "url": "#/console?id=consoleassertvalue-message",
         "summary": "断言"
       },
       {
+        "key": "time",
+        "url": "#/console?id=consoletimelabel",
+        "summary": "启动一个计时器"
+      },
+      {
+        "key": "timeEnd",
+        "url": "#/console?id=consoletimeendlabel",
+        "summary": "停止之前的定时器"
+      },
+      {
+        "key": "trace",
+        "url": "#/console?id=consoletracedata-args",
+        "summary": "打印这个函数所在的调用栈信息"
+      },
+      {
         "key": "input",
-        "url": "#/console?id=consoleinput-data-args",
+        "url": "#/console?id=consoleinputdata-args",
         "summary": "输入"
       },
       {
         "key": "rawInput",
-        "url": "#/console?id=consolerawinput-data-args",
+        "url": "#/console?id=consolerawinputdata-args",
         "summary": "输入字符串"
       },
       {
         "key": "setSize",
-        "url": "#/console?id=consolesetsize-w-h",
-        "summary": "输入字符串"
+        "url": "#/console?id=consolesetsizew-h",
+        "summary": "设置控制台的大小"
       },
       {
         "key": "setPosition",
-        "url": "#/console?id=consolesetposition-x-y",
+        "url": "#/console?id=consolesetpositionx-y",
         "summary": "设置位置"
+      },
+      {
+        "key": "setGlobalLogConfig",
+        "url": "#/console?id=consolesetgloballogconfigconfig",
+        "summary": "设置日志保存的路径和配置"
+      },
+      {
+        "key": "print",
+        "url": "#/console?id=printtext",
+        "summary": "要打印到控制台的信息"
+      },
+      {
+        "key": "setTitle",
+        "url": "#/console?id=consolesettitletitlecolorsize",
+        "summary": "设置标题名称，字体颜色，标题栏高度"
+      },
+      {
+        "key": "setLogSize",
+        "url": "#/console?id=consolesetlogsizesize",
+        "summary": "设置log字号大小"
+      },
+      {
+        "key": "setCanInput",
+        "url": "#/console?id=consolesetcaninputcan",
+        "summary": "控制 console 是否可以输入文字"
+      },
+      {
+        "key": "setBackgroud",
+        "url": "#/console?id=consolesetbackgroudcolor",
+        "summary": "设置 console 背景色"
+      },
+      {
+        "key": "setMaxLines",
+        "url": "#/console?id=consolesetmaxlinesmaxlines",
+        "summary": "设置 console 显示最大行数"
       }
     ]
   },
@@ -315,129 +467,49 @@
     "summary": "对话框",
     "properties": [
       {
-        "key": "select",
-        "url": "#/dialogs?id=dialogsselect-title-items-callback",
-        "summary": "选择"
-      },
-      {
-        "key": "singleChoice",
-        "url": "#/dialogs?id=dialogssinglechoice-title-items-index-callback",
-        "summary": "单选"
-      },
-      {
-        "key": "multiChoice",
-        "url": "#/dialogs?id=dialogsmultichoice-title-items-indices-callback",
-        "summary": "多选"
-      },
-      {
-        "key": "rawInput",
-        "url": "#/dialogs?id=dialogsrawinput-title-prefill-callback",
-        "summary": "输入字符串"
-      },
-      {
-        "key": "input",
-        "url": "#/dialogs?id=dialogsinput-title-prefill-callback",
-        "summary": "输入"
-      },
-      {
         "key": "alert",
-        "url": "#/dialogs?id=dialogsalert-title-content-callback",
+        "url": "#/dialogs?id=dialogsalerttitle-content-callback",
         "summary": "消息框"
       },
       {
         "key": "confirm",
-        "url": "#/dialogs?id=dialogsconfirm-title-content-callback",
+        "url": "#/dialogs?id=dialogsconfirmtitle-content-callback",
         "summary": "确认框"
       },
       {
-        "key": "prompt",
-        "url": "#/dialogs?id=dialogsprompt-title-prefill-callback",
+        "key": "rawInput",
+        "url": "#/dialogs?id=dialogsrawinputtitle-prefill-callback",
         "summary": "输入字符串"
-      }
-    ]
-  },
-  {
-    "name": "images",
-    "url": "#/images",
-    "summary": "图色",
-    "properties": [
-      {
-        "key": "save",
-        "url": "#/images?id=imagessave-image-path",
-        "summary": "保存图片"
       },
       {
-        "key": "pixel",
-        "url": "#/images?id=imagespixel-image-x-y",
-        "summary": "取色"
+        "key": "input",
+        "url": "#/dialogs?id=dialogsinputtitle-prefill-callback",
+        "summary": "输入并返回"
       },
       {
-        "key": "read",
-        "url": "#/images?id=imagesread-path",
-        "summary": "读取图片"
+        "key": "prompt",
+        "url": "#/dialogs?id=dialogsprompttitle-prefill-callback",
+        "summary": "输入字符串"
       },
       {
-        "key": "load",
-        "url": "#/images?id=imagesload-url",
-        "summary": "加载图片"
+        "key": "select",
+        "url": "#/dialogs?id=dialogsselecttitle-items-callback",
+        "summary": "选择"
       },
       {
-        "key": "clip",
-        "url": "#/images?id=imagesclip-img-x-y-w-h",
-        "summary": "剪切图片"
+        "key": "singleChoice",
+        "url": "#/dialogs?id=dialogssinglechoicetitle-items-index-callback",
+        "summary": "单选"
       },
       {
-        "key": "requestScreenCapture",
-        "url": "#/images?id=imagesrequestscreencapture-landscape",
-        "summary": "请求截屏",
-        "global": true
+        "key": "multiChoice",
+        "url": "#/dialogs?id=dialogsmultichoicetitle-items-indices-callback",
+        "summary": "多选"
       },
       {
-        "key": "captureScreen",
-        "url": "#/images?id=images-capturescreen",
-        "summary": "截屏",
-        "global": true
-      },
-      {
-        "key": "findColor",
-        "url": "#/images?id=imagesfindcolor-image-color-options",
-        "summary": "找色",
-        "global": true
-      },
-      {
-        "key": "findColorInRegion",
-        "url": "#/images?id=imagesfindcolorinregion-img-color-x-y-width-height-threads-algorithm-threshold",
-        "summary": "区域找色",
-        "global": true
-      },
-      {
-        "key": "findColorEquals",
-        "url": "#/images?id=imagesfindcolorequals-img-color-x-y-width-height-threads",
-        "summary": "精确找色",
-        "global": true
-      },
-      {
-        "key": "findMultiColors",
-        "url": "#/images?id=imagesclip-img-x-y-w-h",
-        "summary": "多点找色",
-        "global": true
-      },
-      {
-        "key": "detectsColor",
-        "url": "#/images?id=imagesdetectscolor-image-color-x-y-threshold-16-algorithm-diff",
-        "summary": "颜色检测"
-      },
-      {
-        "key": "findImage",
-        "url":"images?id=imagesfindimage-img-template-options",
-        "summary": "找图",
-        "global": true
-      },
-      {
-        "key": "findImageInRegion",
-        "url":"images?id=imagesfindimageinregion-img-template-x-y-width-height-threshold",
-        "summary": "区域找图",
-        "global": true
+        "key": "build",
+        "url": "#/dialogs?id=dialogsbuildproperties",
+        "summary": "创建一个可自定义的对话框"
       }
     ]
   },
@@ -447,8 +519,13 @@
     "summary": "颜色",
     "properties": [
       {
+        "key": "toString",
+        "url": "#/images?id=colorstostringcolor",
+        "summary": "颜色转字符串"
+      },
+      {
         "key": "red",
-        "url": "#/images?id=colorsgreencolor",
+        "url": "#/images?id=colorsredcolor",
         "summary": "R值"
       },
       {
@@ -465,11 +542,6 @@
         "key": "alpha",
         "url": "#/images?id=colorsalphacolor",
         "summary": "透明度"
-      },
-      {
-        "key": "toString",
-        "url": "#/images?id=colorstostringcolor",
-        "summary": "颜色转字符串"
       },
       {
         "key": "rgb",
@@ -495,6 +567,283 @@
         "key": "equals",
         "url": "#/images?id=colorsequalscolor1-color2",
         "summary": "颜色相等"
+      },
+      {
+        "key": "BLACK",
+        "url": "#/images?id=colorsblack",
+        "summary": "黑色",
+        "variable": true
+      },
+      {
+        "key": "DKGRAY",
+        "url": "#/images?id=colorsdkgray",
+        "summary": "深灰色",
+        "variable": true
+      },
+      {
+        "key": "GRAY",
+        "url": "#/images?id=colorsgray",
+        "summary": "灰色",
+        "variable": true
+      },
+      {
+        "key": "LTGRAY",
+        "url": "#/images?id=colorsltgray",
+        "summary": "亮灰色",
+        "variable": true
+      },
+      {
+        "key": "WHITE",
+        "url": "#/images?id=colorswhite",
+        "summary": "c白色",
+        "variable": true
+      },
+      {
+        "key": "RED",
+        "url": "#/images?id=colorsred",
+        "summary": "红色",
+        "variable": true
+      },
+      {
+        "key": "GREEN",
+        "url": "#/images?id=colorsgreen",
+        "summary": "绿色",
+        "variable": true
+      },
+      {
+        "key": "BLUE",
+        "url": "#/images?id=colorsblue",
+        "summary": "蓝色",
+        "variable": true
+      },
+      {
+        "key": "YELLOW",
+        "url": "#/images?id=colorsyellow",
+        "summary": "黄色",
+        "variable": true
+      },
+      {
+        "key": "CYAN",
+        "url": "#/images?id=colorscyan",
+        "summary": "青色",
+        "variable": true
+      },
+      {
+        "key": "MAGENTA",
+        "url": "#/images?id=colorsmagenta",
+        "summary": "品红色",
+        "variable": true
+      },
+      {
+        "key": "TRANSPARENT",
+        "url": "#/images?id=colorstransparent",
+        "summary": "透明",
+        "variable": true
+      }
+    ]
+  },
+  {
+    "name": "images",
+    "url": "#/images?id=images",
+    "summary": "图片",
+    "properties": [
+      {
+        "key": "red",
+        "url": "#/images?id=imagesreadpath",
+        "summary": "读取本地图片"
+      },
+      {
+        "key": "load",
+        "url": "#/images?id=imagesloadurl",
+        "summary": "加载网络图片"
+      },
+      {
+        "key": "copy",
+        "url": "#/images?id=imagescopyimg",
+        "summary": "复制一张图片并返回新的副本"
+      },
+      {
+        "key": "save",
+        "url": "#/images?id=imagessaveimage-path-format-quotpngquot-quality-100",
+        "summary": "保存图片"
+      },
+      {
+        "key": "fromBase64",
+        "url": "#/images?id=imagesfrombase64base64",
+        "summary": "解码Base64数据并返回解码后的图片Image对象"
+      },
+      {
+        "key": "toBase64",
+        "url": "#/images?id=imagestobase64img-format-quotpngquot-quality-100",
+        "summary": "图片编码为base64数据并返回"
+      },
+      {
+        "key": "fromBytes",
+        "url": "#/images?id=imagesfrombytesbytes",
+        "summary": "解码字节数组bytes"
+      },
+      {
+        "key": "toBytes",
+        "url": "#/images?id=imagestobytesimg-format-quotpngquot-quality-100",
+        "summary": "图片编码为字节数组"
+      },
+      {
+        "key": "clip",
+        "url": "#/images?id=imagesclipimg-x-y-w-h",
+        "summary": "裁剪图片"
+      },
+      {
+        "key": "resize",
+        "url": "#/images?id=imagesresizeimg-size-interpolation",
+        "summary": "调整图片大小"
+      },
+      {
+        "key": "scale",
+        "url": "#/images?id=imagesscaleimg-fx-fy-interpolation",
+        "summary": "缩放图片大小"
+      },
+      {
+        "key": "rotate",
+        "url": "#/images?id=imagesrotateimg-degress-x-y",
+        "summary": "逆时针旋转"
+      },
+      {
+        "key": "concat",
+        "url": "#/images?id=imagesconcatimg1-image2-direction",
+        "summary": "拼接两张图片"
+      },
+      {
+        "key": "grayscale",
+        "url": "#/images?id=imagesgrayscaleimg",
+        "summary": "灰度化图片"
+      },
+      {
+        "key": "threshold",
+        "url": "#/images?id=imagethresholdimg-threshold-maxval-type",
+        "summary": "图片阈值化"
+      },
+      {
+        "key": "adaptiveThreshold",
+        "url": "#/images?id=imagesadaptivethresholdimg-maxvalue-adaptivemethod-thresholdtype-blocksize-c",
+        "summary": "对图片进行自适应阈值化处理"
+      },
+      {
+        "key": "cvtColor",
+        "url": "#/images?id=imagescvtcolorimg-code-dstcn",
+        "summary": "对图像进行颜色空间转换"
+      },
+      {
+        "key": "inRange",
+        "url": "#/images?id=imagesinrangeimg-lowerbound-upperbound",
+        "summary": "图片二值化"
+      },
+      {
+        "key": "interval",
+        "url": "#/images?id=imagesintervalimg-color-interval",
+        "summary": "图片二值化"
+      },
+      {
+        "key": "blur",
+        "url": "#/images?id=imagesblurimg-size-anchor-type",
+        "summary": "图像进行模糊（平滑处理）"
+      },
+      {
+        "key": "medianBlur",
+        "url": "#/images?id=imagesmedianblurimg-size",
+        "summary": "图像进行中值滤波"
+      },
+      {
+        "key": "gaussianBlur",
+        "url": "#/images?id=imagesgaussianblurimg-size-sigmax-sigmay-type",
+        "summary": "图像进行高斯模糊"
+      },
+      {
+        "key": "matToImage",
+        "url": "#/images?id=imagesmattoimagemat",
+        "summary": "把Mat对象转换为Image对象"
+      }
+    ]
+  },
+  {
+    "name": "images",
+    "url": "#/images?id=%e6%89%be%e5%9b%be%e6%89%be%e8%89%b2",
+    "summary": "找图找色",
+    "properties": [
+      {
+        "key": "requestScreenCapture",
+        "url": "#/images?id=imagesrequestscreencapturelandscape",
+        "summary": "请求截屏权限"
+      },
+      {
+        "key": "captureScreen",
+        "url": "#/images?id=imagescapturescreen",
+        "summary": "截屏",
+        "stationary":  true
+      },
+      {
+        "key": "captureScreen",
+        "url": "#/images?id=imagescapturescreenpath",
+        "summary": "截屏并保持本地"
+      },
+      {
+        "key": "pixel",
+        "url": "#/images?id=imagespixelimage-x-y",
+        "summary": "取色"
+      },
+      {
+        "key": "readPixels",
+        "url": "#/images?id=imagesreadpixelspath",
+        "summary": "读取图片的像素数据和宽高"
+      },
+      {
+        "key": "findColor",
+        "url": "#/images?id=imagesfindcolorimage-color-options",
+        "summary": "找色"
+      },
+      {
+        "key": "findColorInRegion",
+        "url": "#/images?id=imagesfindcolorinregionimg-color-x-y-width-height-threshold",
+        "summary": "区域找色"
+      },
+      {
+        "key": "findColorEquals",
+        "url": "#/images?id=imagesfindcolorequalsimg-color-x-y-width-height",
+        "summary": "精确找色"
+      },
+      {
+        "key": "findAllPointsForColor",
+        "url": "#/images?id=imagesfindallpointsforcolorimg-color-options",
+        "summary": "找指定颜色出现的所有位置"
+      },
+      {
+        "key": "findMultiColors",
+        "url": "#/images?id=imagesfindmulticolorsimg-firstcolor-colors-options",
+        "summary": "多点找色"
+      },
+      {
+        "key": "detectsColor",
+        "url": "#/images?id=imagesdetectscolorimage-color-x-y-threshold-16-algorithm-quotdiffquot",
+        "summary": "颜色检测"
+      },
+      {
+        "key": "findImage",
+        "url": "#/images?id=imagesfindimageimg-template-options",
+        "summary": "找图"
+      },
+      {
+        "key": "findImageInRegion",
+        "url": "#/images?id=imagesfindimageinregionimg-template-x-y-width-height-threshold",
+        "summary": "区域找图"
+      },
+      {
+        "key": "matchTemplate",
+        "url": "#/images?id=imagesmatchtemplateimg-template-options",
+        "summary": "大图找小图"
+      },
+      {
+        "key": "findCircles",
+        "url": "#/images?id=imagesfindcirclesgray-options",
+        "summary": "图中找圆"
       }
     ]
   },
@@ -506,164 +855,254 @@
       {
         "key": "emitter",
         "url": "#/events?id=eventsemitter",
-        "summary": ""
+        "summary": "返回一个新的EventEmitter",
+        "stationary": true
       },
       {
         "key": "observeKey",
         "url": "#/events?id=eventsobservekey",
-        "summary": "监听按键"
+        "summary": "启用监听按键",
+        "stationary": true
+      },{
+        "key": "onKeyDown",
+        "url": "#/events?id=eventsoncekeydownkeyname-listener",
+        "summary": "注册一个按键被按下的监听函数"
+      },
+      {
+        "key": "onKeyUp",
+        "url": "#/events?id=eventsoncekeyupkeyname-listener",
+        "summary": "注册一个按键抬起的监听函数"
+      },
+      {
+        "key": "onceKeyDown",
+        "url": "#/events?id=eventsoncekeydownkeyname-listener",
+        "summary": "注册一个一次性按键被按下的监听函数"
+      },
+      {
+        "key": "onceKeyUp",
+        "url": "#/events?id=eventsoncekeyupkeyname-listener",
+        "summary": "注册一个一次性按键抬起的监听函数"
+      },
+      {
+        "key": "removeAllKeyDownListeners",
+        "url": "#/events?id=eventsremoveallkeydownlistenerskeyname",
+        "summary": "移除指定按键被按下的所有监听函数"
+      },
+      {
+        "key": "removeAllKeyUpListeners",
+        "url": "#/events?id=eventsremoveallkeyuplistenerskeyname",
+        "summary": "移除指定按键抬起的所有监听函数"
       },
       {
         "key": "setKeyInterceptionEnabled",
-        "url": "#/events?id=eventssetkeyinterceptionenabled-key-enabled",
-        "summary": "屏蔽按键"
+        "url": "#/events?id=eventssetkeyinterceptionenabledkey-enabled",
+        "summary": "屏蔽按键(有参数就屏蔽指定按键,没有则屏蔽所有按键)"
       },
       {
         "key": "observeTouch",
         "url": "#/events?id=eventsobservetouch",
-        "summary": "监听触摸"
+        "summary": "监听触摸（需要 root 权限）",
+        "stationary": true
       },
       {
-        "key": "observeNotification",
-        "url": "#/events?id=events-obversenotification",
-        "summary": "监听通知"
-      },
-      {
-        "key": "onKeyDown",
-        "url": "#/events?id=eventsonkeydown-keyname-listener",
-        "summary": "按键按下事件"
-      },
-      {
-        "key": "onKeyUp",
-        "url": "#/events?id=eventsonkeyup-keyname-listener",
-        "summary": "按键弹起事件"
-      },
-      {
-        "key": "onceKeyDown",
-        "url": "#/events?id=eventsoncekeydown-keyname-listener",
-        "summary": ""
-      },
-      {
-        "key": "onceKeyUp",
-        "url": "#/events?id=eventsoncekeyup-keyname-listener",
-        "summary": ""
-      },
-      {
-        "key": "onToast",
-        "url": "#/events?id=events-toast",
-        "summary": "toast事件"
-      },
-      {
-        "key": "onNotification",
-        "url": "#/events?id=events-notification",
-        "summary": "通知事件"
-      },
-      {
-        "key": "removeAllKeyDownListeners",
-        "url": "#/events?id=eventsremoveallkeydownlisteners-keyname",
-        "summary": ""
-      },
-      {
-        "key": "removeAllKeyUpListeners",
-        "url": "#/events?id=eventsremoveallkeyuplisteners-keyname",
-        "summary": ""
-      },
-      {
-        "key": "onTouch",
-        "url": "#/events?id=eventsontouch-listener",
-        "summary": "触摸事件"
-      },
-      {
-        "key": "removeAllTouchListeners",
-        "url": "#/events?id=eventsremovealltouchlisteners",
-        "summary": ""
+        "key": "setTouchEventTimeout",
+        "url": "#/events?id=eventssettoucheventtimeouttimeout",
+        "summary": "设置两个触摸事件分发的最小时间间隔"
       },
       {
         "key": "getTouchEventTimeout",
         "url": "#/events?id=eventsgettoucheventtimeout",
-        "summary": ""
+        "summary": "获取当前触摸事件分发的最小时间间隔",
+        "stationary": true
       },
       {
-        "key": "setTouchEventTimeout",
-        "url": "#/events?id=eventssettoucheventtimeout-timeout",
-        "summary": ""
+        "key": "onTouch",
+        "url": "#/events?id=eventsontouchlistener",
+        "summary": "注册一个触摸监听函数"
       },
       {
-        "key": "on",
-        "url": "#/events?id=events-eventemitter-on-eventname-listener",
-        "summary": ""
+        "key": "removeAllTouchListeners",
+        "url": "#/events?id=eventsremovealltouchlisteners",
+        "summary": "移除所有触摸监听函数",
+        "stationary": true
       },
       {
-        "key": "once",
-        "url": "#/events?id=events-eventemitter-once-eventname-listener",
-        "summary": ""
+        "key": "observeToast",
+        "url": "#/events?id=eventsobservetoast",
+        "summary": "开启 toast 监听",
+        "stationary": true
+      }
+    ]
+  },
+  {
+    "name": "Notification",
+    "url": "#/events?id=notification",
+    "summary": "通知监听",
+    "properties": [
+      {
+        "key": "observeNotification",
+        "url": "#/events?id=eventsobservenotification",
+        "summary": "开启通知监听",
+        "stationary": true
       },
       {
-        "key": "emit",
-        "url": "#/events?id=events-eventemitter-emit-eventname-args",
-        "summary": ""
+        "key": "number",
+        "url": "#/events?id=notificationnumber",
+        "summary": "通知数量",
+        "variable": true
       },
       {
-        "key": "getListeners",
-        "url": "#/",
-        "summary": ""
+        "key": "when",
+        "url": "#/events?id=notificationwhen",
+        "summary": "通知发出时间的时间戳",
+        "variable": true
+      },
+      {
+        "key": "getPackageName",
+        "url": "#/events?id=notificationgetpackagename",
+        "summary": "获取发出通知的应用包名",
+        "stationary": true
+      },
+      {
+        "key": "getTitle",
+        "url": "#/events?id=notificationgettitle",
+        "summary": "获取通知标题",
+        "stationary": true
+      },
+      {
+        "key": "getText",
+        "url": "#/events?id=notificationgettext",
+        "summary": "获取通知内容",
+        "stationary": true
+      },
+      {
+        "key": "click",
+        "url": "#/events?id=notificationclick",
+        "summary": "点击通知",
+        "stationary": true
+      },
+      {
+        "key": "delete",
+        "url": "#/events?id=notificationdelete",
+        "summary": "删除该通知",
+        "stationary": true
+      }
+    ]
+  },
+  {
+    "name": "KeyEvent",
+    "url": "#/events?id=keyevent",
+    "summary": "按键事件",
+    "properties": [
+      {
+        "key": "getAction",
+        "url": "#/events?id=keyeventgetaction",
+        "summary": "获取按键事件的动作",
+        "stationary": true
+      },
+      {
+        "key": "getKeyCode",
+        "url": "#/events?id=keyeventgetkeycode",
+        "summary": "返回按键的键值"
+      },
+      {
+        "key": "getEventTime",
+        "url": "#/events?id=keyeventgeteventtime",
+        "summary": "返回事件的时间戳",
+        "stationary": true
+      },
+      {
+        "key": "getDownTime",
+        "url": "#/events?id=keyeventgetdowntime",
+        "summary": "返回最近一次按下事件的时间戳",
+        "stationary": true
+      },
+      {
+        "key": "keyCodeToString",
+        "url": "#/events?id=keyeventkeycodetostringkeycode",
+        "summary": "把键值转换为字符串"
+      }
+    ]
+  },
+  {
+    "name": "EventEmitter",
+    "url": "#/events?id=eventemitter",
+    "summary": "事件监听器",
+    "properties": [
+
+      {
+        "key": "defaultMaxListeners",
+        "url": "#/events?id=eventemitterdefaultmaxlisteners",
+        "summary": "默认最大监听函数数量"
       },
       {
         "key": "addListener",
-        "url": "#/events?id=events-eventemitter-addlistener-eventname-listener",
-        "summary": ""
+        "url": "#/events?id=eventemitteraddlistenereventname-listener",
+        "summary": "添加监听函数"
+      },
+      {
+        "key": "emit",
+        "url": "#/events?id=eventemitteremiteventname-args",
+        "summary": "触发(调用)事件函数"
       },
       {
         "key": "eventNames",
-        "url": "#/events?id=events-eventemitter-eventnames",
-        "summary": ""
-      },
-      {
-        "key": "listenerCount",
-        "url": "#/events?id=events-eventemitter-listenercount-eventname",
-        "summary": ""
-      },
-      {
-        "key": "listeners",
-        "url": "#/events?id=events-eventemitter-listeners-eventname",
-        "summary": ""
-      },
-      {
-        "key": "prependListener",
-        "url": "#/events?id=events-eventemitter-prependlistener-eventname-listener",
-        "summary": ""
-      },
-      {
-        "key": "prependOnceListener",
-        "url": "#/events?id=events-eventemitter-prependoncelistener-eventname-listener",
-        "summary": ""
-      },
-      {
-        "key": "removeAllListeners",
-        "url": "#/events?id=events-eventemitter-removealllisteners-eventname",
-        "summary": ""
-      },
-      {
-        "key": "removeListener",
-        "url": "#/events?id=events-eventemitter-removelistener-eventname-listener",
-        "summary": ""
-      },
-      {
-        "key": "setMaxListeners",
-        "url": "#/events?id=events-eventemitter-setmaxlisteners-n",
-        "summary": ""
+        "url": "#/events?id=eventemittereventnames",
+        "summary": "获取所有事件名称(字符数组)",
+        "stationary": true
       },
       {
         "key": "getMaxListeners",
-        "url": "#/events?id=events-eventemitter-getmaxlisteners",
-        "summary": ""
+        "url": "#/events?id=eventemittergetmaxlisteners",
+        "summary": "获取最大监听函数数量",
+        "stationary": true
       },
       {
-        "key": "defaultMaxListeners",
-        "url": "#/events?id=events-eventemitter-defaultmaxlisteners",
-        "summary": ""
+        "key": "listenerCount",
+        "url": "#/events?id=eventemitterlistenercounteventname",
+        "summary": "获取监听函数数量"
+      },
+      {
+        "key": "listeners",
+        "url": "#/events?id=eventemitterlistenerseventname",
+        "summary": "获取监听函数数组"
+      },
+      {
+        "key": "on",
+        "url": "#/events?id=eventemitteroneventname-listener",
+        "summary": "添加监听函数到数组末尾"
+      },
+      {
+        "key": "once",
+        "url": "#/events?id=eventemitteronceeventname-listener",
+        "summary": "添加一次性监听函数到数组末尾"
+      },
+      {
+        "key": "prependListener",
+        "url": "#/events?id=eventemitterprependlistenereventname-listener",
+        "summary": "添加监听函数到数组开头"
+      },
+      {
+        "key": "prependOnceListener",
+        "url": "#/events?id=eventemitterprependoncelistenereventname-listener",
+        "summary": "添加一次性监听函数到数组开头"
+      },
+      {
+        "key": "removeAllListeners",
+        "url": "#/events?id=eventemitterremovealllistenerseventname",
+        "summary": "移除所有监听函数(可指定事件名称)"
+      },
+      {
+        "key": "removeListener",
+        "url": "#/events?id=eventemitterremovelistenereventname-listener",
+        "summary": "从指定事件名称中移除指定的监听函数"
+      },
+      {
+        "key": "setMaxListeners",
+        "url": "#/events?id=eventemittersetmaxlistenersn",
+        "summary": "设置最大监听函数数量"
       }
-    ]
+      ]
   },
   {
     "name": "files",
@@ -672,144 +1111,145 @@
     "properties": [
       {
         "key": "isFile",
-        "summary": "文件判断",
-        "url": "#/files?id=filesisfile-path"
+        "url": "#/files?id=filesisfilepath",
+        "summary": "判断是否为文件"
       },
       {
         "key": "isDir",
-        "summary": "文件夹判断",
-        "url": "#/files?id=filesisdir-path"
+        "url": "#/files?id=filesisdirpath",
+        "summary": "判断是否为文件夹"
       },
       {
         "key": "isEmptyDir",
-        "summary": "空文件夹判断",
-        "url": "#/files?id=filesisemptydir-path"
+        "url": "#/files?id=filesisemptydirpath",
+        "summary": "判断是否为空文件夹"
       },
       {
         "key": "join",
-        "summary": "连接路径",
-        "url": "#/files?id=filesjoin-parent-child"
+        "url": "#/files?id=filesjoinparent-child",
+        "summary": "连接两个路径"
       },
       {
         "key": "create",
-        "summary": "创建文件",
-        "url": "#/files?id=filescreate-path"
+        "url": "#/files?id=filescreatepath",
+        "summary": "创建文件"
       },
       {
         "key": "createWithDirs",
-        "summary": "创建文件",
-        "url": "#/files?id=filescreatewithdirs-path"
+        "url": "#/files?id=filescreatewithdirspath",
+        "summary": "创建文件夹"
       },
       {
         "key": "exists",
-        "summary": "判断文件存在",
-        "url": "#/files?id=filesexists-path"
+        "url": "#/files?id=filesexistspath",
+        "summary": "判断是否存在文件"
       },
       {
         "key": "ensureDir",
-        "summary": "确保文件夹",
-        "url": "#/files?id=filesensuredir-path"
+        "url": "#/files?id=filesensuredirpath",
+        "summary": "确保文件夹存在,不存在则创建"
       },
       {
         "key": "read",
-        "summary": "读取文本",
-        "url": "#/files?id=filesread-path-encoding-utf-8"
+        "url": "#/files?id=filesreadpath-encoding-quotutf-8quot",
+        "summary": "读取文本文件"
       },
       {
         "key": "readBytes",
-        "summary": "读取字节",
-        "url": "#/files?id=filesreadbytes-path"
+        "url": "#/files?id=filesreadbytespath",
+        "summary": "读取文件并返回字节数组"
       },
       {
         "key": "write",
-        "summary": "写入文本",
-        "url": "#/files?id=fileswrite-path-text-encoding-utf-8"
+        "url": "#/files?id=fileswritepath-text-encoding-quotutf-8quot",
+        "summary": "写入文本文件"
       },
       {
         "key": "writeBytes",
-        "summary": "写入字节",
-        "url": "#/files?id=fileswritebytes-path-bytes"
+        "url": "#/files?id=fileswritebytespath-bytes",
+        "summary": "写入字节数组到文件"
       },
       {
         "key": "append",
-        "summary": "附加文本",
-        "url": "#/files?id=filesappend-path-text-encoding-utf-8"
+        "url": "#/files?id=filesappendpath-text-encoding-39utf-839",
+        "summary": "追加文本到文件末尾"
       },
       {
         "key": "appendBytes",
-        "summary": "附加字节",
-        "url": "#/files?id=filesappendbytes-path-text-encoding-utf-8"
+        "url": "#/files?id=filesappendbytespath-text-encoding-39utf-839",
+        "summary": "追加字节数组(二进制数据)到文件末尾"
       },
       {
         "key": "copy",
-        "summary": "复制",
-        "url": "#/files?id=filescopy-frompath-topath"
+        "url": "#/files?id=filescopyfrompath-topath",
+        "summary": "复制文件到指定路径"
       },
       {
         "key": "move",
-        "summary": "移动",
-        "url": "#/files?id=filesmove-frompath-topath"
+        "url": "#/files?id=filesmovefrompath-topath",
+        "summary": "移动文件到指定路径"
       },
       {
         "key": "rename",
-        "summary": "重命名",
-        "url": "#/files?id=filesrename-path-newname"
+        "url": "#/files?id=filesrenamepath-newname",
+        "summary": "重命名文件"
       },
       {
         "key": "renameWithoutExtension",
-        "summary": "重命名",
-        "url": "#/files?id=filesrenamewithoutextension-path-newname"
+        "url": "#/files?id=filesrenamewithoutextensionpath-newname",
+        "summary": "重命名文件(不包含拓展名)"
       },
       {
         "key": "getName",
-        "summary": "获取文件名",
-        "url": "#/files?id=filesgetname-path"
+        "url": "#/files?id=filesgetnamepath",
+        "summary": "获取文件名"
       },
       {
         "key": "getNameWithoutExtension",
-        "summary": "获取文件名",
-        "url": "#/files?id=filesgetnamewithoutextension-path"
+        "url": "#/files?id=filesgetnamewithoutextensionpath",
+        "summary": "获取文件名(不包含拓展名)"
       },
       {
         "key": "getExtension",
-        "summary": "获取拓展名",
-        "url": "#/files?id=filesgetextension-path"
+        "url": "#/files?id=filesgetextensionpath",
+        "summary": "获取文件拓展名"
       },
       {
         "key": "remove",
-        "summary": "删除",
-        "url": "#/files?id=filesremove-path"
+        "url": "#/files?id=filesremovepath",
+        "summary": "删除文件(空文件夹)"
       },
       {
         "key": "removeDir",
-        "summary": "删除文件夹",
-        "url": "#/files?id=filesremovedir-path"
+        "url": "#/files?id=filesremovedirpath",
+        "summary": "删除文件夹"
       },
       {
         "key": "getSdcardPath",
-        "summary": "SD卡路径",
-        "url": "#/files?id=filesgetsdcardpath"
+        "url": "#/files?id=filesgetsdcardpath",
+        "summary": "SD卡路径"
       },
       {
         "key": "cwd",
-        "summary": "当前文件夹",
-        "url": "#/files?id=filescwd"
+        "url": "#/files?id=filescwd",
+        "summary": "当前工作文件夹路径",
+        "stationary": true
       },
       {
         "key": "path",
-        "summary": "解析路径",
-        "url": "#/files?id=filespath-relativepath"
+        "url": "#/files?id=filespath-relativepath",
+        "summary": "返回相对路径对应的绝对路径"
       },
       {
         "key": "listDir",
-        "summary": "列表文件夹",
-        "url": "#/files?id=fileslistdir-path-filter"
+        "url": "#/files?id=fileslistdirpath-filter",
+        "summary": "列表文件夹"
       },
       {
-        "global": true,
         "key": "open",
+        "url": "#/files?id=openpath-mode-quotrquot-encoding-quotutf-8quot-buffersize-8192",
         "summary": "打开文件",
-        "url": "#/files?id=files-open-path-mode-r-encoding-utf-8-buffersize-8192"
+        "global": true
       }
     ]
   },
@@ -856,9 +1296,6 @@
       }
     ]
   },
-
-
-
   {
     "name": "selector",
     "url": "#/widgetsBasedAutomation?id=uiselector",
@@ -1148,6 +1585,16 @@
     "summary": "悬浮窗",
     "properties": [
       {
+        "key": "checkPermission",
+        "url": "#/floaty?id=floatycheckpermission",
+        "summary": "是否有悬浮窗权限"
+      },
+      {
+        "key": "requestPermission",
+        "url": "#/floaty?id=floatyrequestpermission",
+        "summary": "请求悬浮窗权限"
+      },
+      {
         "key": "window",
         "url": "#/floaty?id=floatywindowlayout",
         "summary": "悬浮窗(带按键)"
@@ -1280,27 +1727,32 @@
       {
         "key": "getIMEI",
         "summary": "IMEI",
-        "url": "#/device?id=devicegetimei"
+        "url": "#/device?id=devicegetimei",
+        "stationary": true
       },
       {
         "key": "getAndroidId",
         "summary": "AndroidID",
-        "url": "#/device?id=devicegetandroidid"
+        "url": "#/device?id=devicegetandroidid",
+        "stationary": true
       },
       {
         "key": "getMacAddress",
         "summary": "MAC地址",
-        "url": "#/device?id=devicegetmacaddress"
+        "url": "#/device?id=devicegetmacaddress",
+        "stationary": true
       },
       {
         "key": "getBrightness",
         "summary": "屏幕亮度",
-        "url": "#/device?id=devicegetbrightness"
+        "url": "#/device?id=devicegetbrightness",
+        "stationary": true
       },
       {
         "key": "getBrightnessMode",
         "summary": "亮度模式",
-        "url": "#/device?id=devicegetbrightnessmode"
+        "url": "#/device?id=devicegetbrightnessmode",
+        "stationary": true
       },
       {
         "key": "setBrightness",
@@ -1315,32 +1767,38 @@
       {
         "key": "getMusicVolume",
         "summary": "媒体音量",
-        "url": "#/device?id=devicegetmusicvolume"
+        "url": "#/device?id=devicegetmusicvolume",
+        "stationary": true
       },
       {
         "key": "getNotificationVolume",
         "summary": "通知音量",
-        "url": "#/device?id=devicegetnotificationvolume"
+        "url": "#/device?id=devicegetnotificationvolume",
+        "stationary": true
       },
       {
         "key": "getAlarmVolume",
         "summary": "闹钟音量",
-        "url": "#/device?id=devicegetalarmvolume"
+        "url": "#/device?id=devicegetalarmvolume",
+        "stationary": true
       },
       {
         "key": "getMusicMaxVolume",
         "summary": "媒体最大音量",
-        "url": "#/device?id=devicegetmusicmaxvolume"
+        "url": "#/device?id=devicegetmusicmaxvolume",
+        "stationary": true
       },
       {
         "key": "getNotificationMaxVolume",
         "summary": "通知最大音量",
-        "url": "#/device?id=devicegetnotificationmaxvolume"
+        "url": "#/device?id=devicegetnotificationmaxvolume",
+        "stationary": true
       },
       {
         "key": "getAlarmMaxVolume",
         "summary": "闹钟最大音量",
-        "url": "#/device?id=devicegetalarmmaxvolume"
+        "url": "#/device?id=devicegetalarmmaxvolume",
+        "stationary": true
       },
       {
         "key": "setMusicVolume",
@@ -1360,37 +1818,44 @@
       {
         "key": "getBattery",
         "summary": "获取电量",
-        "url": "#/device?id=devicegetbattery"
+        "url": "#/device?id=devicegetbattery",
+        "stationary": true
       },
       {
         "key": "isCharging",
         "summary": "是否充电",
-        "url": "#/device?id=deviceischarging"
+        "url": "#/device?id=deviceischarging",
+        "stationary": true
       },
       {
         "key": "getTotalMem",
         "summary": "全部内存",
-        "url": "#/device?id=devicegettotalmem"
+        "url": "#/device?id=devicegettotalmem",
+        "stationary": true
       },
       {
         "key": "getAvailMem",
         "summary": "可用内存",
-        "url": "#/device?id=devicegetavailmem"
+        "url": "#/device?id=devicegetavailmem",
+        "stationary": true
       },
       {
         "key": "isScreenOn",
         "summary": "屏幕是否亮",
-        "url": "#/device?id=deviceisscreenon"
+        "url": "#/device?id=deviceisscreenon",
+        "stationary": true
       },
       {
         "key": "wakeUp",
         "summary": "唤醒设备",
-        "url": "#/device?id=devicewakeup"
+        "url": "#/device?id=devicewakeup",
+        "stationary": true
       },
       {
         "key": "wakeUpIfNeeded",
         "summary": "唤醒",
-        "url": "#/device?id=devicewakeupifneeded"
+        "url": "#/device?id=devicewakeupifneeded",
+        "stationary": true
       },
       {
         "key": "keepScreenOn",
@@ -1405,7 +1870,8 @@
       {
         "key": "cancelKeepingAwake",
         "summary": "取消保持唤醒",
-        "url": "#/device?id=devicecancelkeepingawake"
+        "url": "#/device?id=devicecancelkeepingawake",
+        "stationary": true
       },
       {
         "key": "vibrate",
@@ -1415,7 +1881,8 @@
       {
         "key": "cancelVibration",
         "summary": "取消震动",
-        "url": "#/device?id=devicecancelvibration"
+        "url": "#/device?id=devicecancelvibration",
+        "stationary": true
       }
     ]
   },
@@ -1457,130 +1924,150 @@
     "url": "#/keys",
     "properties": [
       {
-        "global": true,
         "key": "back",
+        "url": "#/keys?id=back",
         "summary": "返回",
-        "url": "#/keys?id=back"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "home",
+        "url": "#/keys?id=home",
         "summary": "HOME键",
-        "url": "#/keys?id=home"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "powerDialog",
+        "url": "#/keys?id=powerdialog",
         "summary": "电源菜单",
-        "url": "#/keys?id=powerdialog"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "notifications",
+        "url": "#/keys?id=notifications",
         "summary": "拉通知栏",
-        "url": "#/keys?id=notifications"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "quickSettings",
+        "url": "#/keys?id=quicksettings",
         "summary": "长拉通知栏",
-        "url": "#/keys?id=quicksettings"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "recents",
+        "url": "#/keys?id=recents",
         "summary": "最近任务",
-        "url": "#/keys?id=recents"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "splitScreen",
+        "url": "#/keys?id=splitscreen",
         "summary": "分屏",
-        "url": "#/keys?id=splitscreen"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "Home",
+        "url": "#/keys?id=home-1",
         "summary": "HOME键",
-        "url": "#/keys?id=home-1"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "Back",
+        "url": "#/keys?id=back-1",
         "summary": "返回键",
-        "url": "#/keys?id=back-1"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "Power",
+        "url": "#/keys?id=power",
         "summary": "电源键",
-        "url": "#/keys?id=power"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "Menu",
+        "url": "#/keys?id=menu",
         "summary": "菜单键",
-        "url": "#/keys?id=menu"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "VolumeUp",
+        "url": "#/keys?id=volumeup",
         "summary": "音量上键",
-        "url": "#/keys?id=volumeup"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "VolumeDown",
+        "url": "#/keys?id=volumedown",
         "summary": "音量下键",
-        "url": "#/keys?id=volumedown"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "Camera",
+        "url": "#/keys?id=camera",
         "summary": "照相键",
-        "url": "#/keys?id=camera"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "Up",
+        "url": "#/keys?id=up",
         "summary": "上键",
-        "url": "#/keys?id=up"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
         "key": "Down",
+        "url": "#/keys?id=down",
         "summary": "下键",
-        "url": "#/keys?id=down"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
-        "key": "Left",
+        "key": "left",
+        "url": "#/keys?id=left",
         "summary": "左键",
-        "url": "#/keys?id=left"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
-        "key": "Right",
+        "key": "right",
+        "url": "#/keys?id=right",
         "summary": "右键",
-        "url": "#/keys?id=right"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
-        "key": "OK",
+        "key": "ok",
+        "url": "#/keys?id=ok",
         "summary": "确定键",
-        "url": "#/keys?id=ok"
+        "global": true,
+        "stationary": true
       },
       {
-        "global": true,
-        "key": "Text",
+        "key": "text",
+        "url": "#/keys?id=texttext",
         "summary": "输入文本",
-        "url": "#/keys?id=texttext"
+        "stationary": true
       },
       {
-        "global": true,
-        "key": "KeyCode",
+        "key": "keycode",
+        "url": "#/keys?id=keycodecode",
         "summary": "键值模拟",
-        "url": "#/keys?id=keycodecode"
+        "global": true,
+        "stationary": true
       }
     ]
   },
@@ -1622,7 +2109,8 @@
       {
         "key": "clear",
         "url": "#/storages?id=storageclear",
-        "summary": "移除该本地存储的所有数据"
+        "summary": "移除该本地存储的所有数据",
+        "stationary": true
       }
     ]
   },
@@ -1639,17 +2127,20 @@
       {
         "key": "shutDownAll",
         "summary": "关闭所有线程",
-        "url": "#/threads?id=threadsshutdownall"
+        "url": "#/threads?id=threadsshutdownall",
+        "stationary": true
       },
       {
         "key": "currentThread",
         "summary": "当前线程",
-        "url": "#/threads?id=threadscurrentthread"
+        "url": "#/threads?id=threadscurrentthread",
+        "stationary": true
       },
       {
         "key": "disposable",
         "summary": "新建一个 Disposable 对象",
-        "url": "#/threads?id=threadsdisposable"
+        "url": "#/threads?id=threadsdisposable",
+        "stationary": true
       },
       {
         "key": "atomic",
@@ -1659,7 +2150,8 @@
       {
         "key": "lock",
         "summary": "创建锁",
-        "url": "#/threads?id=threadslock"
+        "url": "#/threads?id=threadslock",
+        "stationary": true
       },
       {
         "key": "threadinterrupt",
@@ -1670,124 +2162,135 @@
   },
   {
     "name": "media",
+    "url": "#/media",
+    "summary": "多媒体",
     "properties": [
       {
         "key": "scanFile",
         "summary": "扫描文件",
-        "url": "#/media?id=media-media-scanfile-path"
+        "url": "#/media?id=mediascanfilepath"
       },
       {
         "key": "playMusic",
         "summary": "播放音乐",
-        "url": "#/media?id=media-media-playmusic-path-volume-looping"
+        "url": "#/media?id=mediaplaymusicpath-volume-looping"
       },
       {
         "key": "musicSeekTo",
         "summary": "调整进度",
-        "url": "#/media?id=media-media-musicseekto-msec"
+        "url": "#/media?id=mediamusicseektomsec"
       },
       {
         "key": "pauseMusic",
         "summary": "暂停音乐",
-        "url": "#/media?id=media-media-pausemusic"
+        "url": "#/media?id=mediapausemusic",
+        "stationary": true
       },
       {
         "key": "resumeMusic",
         "summary": "继续播放",
-        "url": "#/media?id=media-media-resumemusic"
+        "url": "#/media?id=mediaresumemusic",
+        "stationary": true
       },
       {
         "key": "stopMusic",
         "summary": "停止音乐",
-        "url": "#/media?id=media-media-stopmusic"
+        "url": "#/media?id=mediastopmusic",
+        "stationary": true
       },
       {
         "key": "isMusicPlaying",
         "summary": "是否在播放",
-        "url": "#/media?id=media-media-ismusicplaying"
+        "url": "#/media?id=mediaismusicplaying",
+        "stationary": true
       },
       {
         "key": "getMusicDuration",
         "summary": "音乐时长",
-        "url": "#/media?id=media-media-getmusicduration"
+        "url": "#/media?id=mediagetmusicduration",
+        "stationary": true
       },
       {
         "key": "getMusicCurrentPosition",
-        "summary": "当前位置",
-        "url": "#/media?id=media-media-getmusiccurrentposition"
+        "summary": "返回当前音乐的播放进度",
+        "url": "#/media?id=mediagetmusiccurrentposition",
+        "stationary": true
       }
-    ],
-    "url": "#/media",
-    "summary": "多媒体"
+    ]
   },
   {
     "name": "sensors",
+    "url": "#/sensors",
+    "summary": "传感器",
     "properties": [
       {
         "key": "register",
-        "summary": "注册监听",
-        "url": "#/sensors?id=sensors-sensors-register-sensorname-delay"
+        "summary": "注册传感器监听",
+        "url": "#/sensors?id=sensorsregistersensorname-delay"
       },
       {
         "key": "unregister",
-        "summary": "注销监听",
-        "url": "#/sensors?id=sensors-sensors-unregister-emitter"
+        "summary": "注销传感器监听",
+        "url": "#/sensors?id=sensorsunregisteremitter"
       },
       {
         "key": "unregisterAll",
-        "summary": "注销所有",
-        "url": "#/sensors?id=sensors-sensors-unregisterall"
+        "summary": "注销传感器所有监听",
+        "url": "#/sensors?id=sensorsunregisterall",
+        "stationary": true
       },
       {
         "key": "ignoresUnsupportedSensor",
         "summary": "忽略不支持传感器",
-        "url": "#/sensors?id=sensors-sensors-ignoresunsupportedsensor",
+        "url": "#/sensors?id=sensorsignoresunsupportedsensor",
         "variable": true
       }
-    ],
-    "url": "#/sensors",
-    "summary": "传感器"
+    ]
   },
   {
     "name": "engines",
+    "url": "#/engines",
+    "summary": "脚本引擎",
     "properties": [
       {
         "key": "execScript",
         "summary": "执行脚本",
-        "url": "#/engines?id=engines-engines-execscript-name-script-config"
+        "url": "#/engines?id=enginesexecscriptname-script-config"
       },
       {
         "key": "execScriptFile",
         "summary": "执行脚本文件",
-        "url": "#/engines?id=engines-engines-execscriptfile-path-config"
+        "url": "#/engines?id=enginesexecscriptfilepath-config"
       },
       {
         "key": "execAutoFile",
         "summary": "执行录制文件",
-        "url": "#/engines?id=engines-engines-execautofile-path-config"
+        "url": "#/engines?id=enginesexecautofilepath-config"
       },
       {
         "key": "stopAll",
-        "summary": "停止全部",
-        "url": "#/engines?id=engines-engines-stopall"
+        "summary": "停止所有正在运行的脚本",
+        "url": "#/engines?id=enginesstopall",
+        "stationary": true
       },
       {
         "key": "stopAllAndToast",
-        "summary": "停止并提示",
-        "url": "#/engines?id=engines-engines-stopallandtoast"
+        "summary": "停止脚本并提示",
+        "url": "#/engines?id=enginesstopallandtoast",
+        "stationary": true
       },
       {
         "key": "myEngine",
         "summary": "当前引擎",
-        "url": "#/engines?id=engines-engines-myengine"
+        "url": "#/engines?id=enginesmyengine",
+        "stationary": true
       },
       {
         "key": "all",
-        "summary": "所有引擎",
-        "url": "#/engines?id=engines-engines-all"
+        "summary": "返回当前所有引擎",
+        "url": "#/engines?id=enginesall",
+        "stationary": true
       }
-    ],
-    "url": "#/engines",
-    "summary": "脚本引擎"
+    ]
   }
 ]

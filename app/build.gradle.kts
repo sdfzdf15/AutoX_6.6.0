@@ -296,6 +296,7 @@ dependencies {
     implementation("io.noties.markwon:core:4.6.2")
     implementation("androidx.viewpager2:viewpager2:1.1.0-beta01")
     implementation("io.coil-kt:coil-compose:2.0.0-rc03")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }
 
 fun copyTemplateToAPP(isDebug: Boolean, to: File) {
@@ -365,7 +366,7 @@ tasks.register("installationDocumentation") {
     }
 }
 tasks.named("clean").configure {
-    doFirst { delete(docsDir) }
+   // doFirst { delete(docsDir) }
 }
 repositories {
     google() // 👈 就加这个！

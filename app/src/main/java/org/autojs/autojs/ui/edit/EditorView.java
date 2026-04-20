@@ -13,13 +13,16 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
+import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -274,6 +277,8 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         setUpInputMethodEnhancedBar();
         setUpFunctionsKeyboard();
         setMenuItemStatus(R.id.save, false);
+
+
        /* if (mDocsWebView.getIsTbs()) {
             mDocsWebView.getWebViewTbs().getSettings().setDisplayZoomControls(true);
             mDocsWebView.getWebViewTbs().loadUrl(Pref.getDocumentationUrl() + "index.html");
@@ -283,7 +288,6 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         }*/
         // 核心：读取保存的文档源，自动加载对应文档
         // 核心：读取保存的文档源，自动加载对应文档
-
 
 
         // 核心：读取保存的文档源，自动加载对应文档
@@ -298,9 +302,6 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
         // 复用 switchDocument 逻辑，自动加载（统一用原生WebView，TBS自动兼容）
         EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
-
-
-
 
 
         Themes.getCurrent(getContext())
@@ -324,6 +325,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with((Activity) getContext())
                 .setContent(mEditor)
@@ -332,8 +334,51 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
                 .setEditView(mEditor.getCodeEditText())
                 .build();
         mFunctionsKeyboard.setClickCallback(this);
-    }
+        // =============================================
+        // 👇 只加这一段！只提示！不影响任何功能！
+        // =============================================
+        mShowFunctionsButton.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
 
+                // ========== 延迟 200 毫秒 再判断位置 ==========
+                v.postDelayed(() -> {
+                    int[] location = new int[2];
+                    mShowFunctionsButton.getLocationOnScreen(location);
+                    int buttonY = location[1];
+                    int screenHeight = getResources().getDisplayMetrics().heightPixels;
+
+                    boolean isButtonAtBottom = mShowFunctionsButton.getVisibility() == View.VISIBLE
+                            && buttonY > screenHeight * 0.8f;
+
+                    if (isButtonAtBottom) {
+                        // 判断软键盘是否弹出
+                        boolean isKeyboardShown = isSoftInputShown();
+                        if (isKeyboardShown) {
+                            // 弹出键盘: 显示提示2
+                            Toast.makeText(getContext(), "打开软键盘，不显示函数面板", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // 未弹出键盘: 显示提示1
+                            Toast.makeText(getContext(), "关闭函数面板一次", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, 200);
+
+            }
+            return false;
+        });
+    }
+    /**
+     * 判断软键盘是否弹出
+     */
+    private boolean isSoftInputShown() {
+        final int SOFT_INPUT_THRESHOLD = 100;
+        View rootView = mShowFunctionsButton.getRootView();
+        Rect rect = new Rect();
+        rootView.getWindowVisibleDisplayFrame(rect);
+        int screenHeight = rootView.getResources().getDisplayMetrics().heightPixels;
+        int keyboardHeight = screenHeight - rect.bottom;
+        return keyboardHeight > SOFT_INPUT_THRESHOLD;
+    }
     private void setUpInputMethodEnhancedBar() {
         mSymbolBar.setCodeCompletions(Symbols.getSymbols());
         mCodeCompletionBar.setOnHintClickListener(this);
@@ -503,8 +548,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
     @SuppressLint("CheckResult")
     public void saveFile() {
-        // 👇 就加这一行！！！
-       // hideKeyboardInput();
+        // hideKeyboardInput();
         save()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(Observers.emptyConsumer(), e -> {
@@ -704,61 +748,84 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
             EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
             finalUrl = "http://localhost:8080/" + url;
         } else {
-            finalUrl = source.getUri()+ url;
+            finalUrl = source.getUri() + url;
         }
 
         showManual(finalUrl, completion.getHint());
     }
 
 
-  private void showManual(String absUrl, String title) {
-      // 不再拼接！直接使用传进来的完整地址！
-      new ManualDialog(getContext())
-              .title(title)
-              .url(absUrl)
-              .pinToLeft(v -> {
-                  mDocsWebView.getWebView().loadUrl(absUrl);
-                  mDrawerLayout.openDrawer(GravityCompat.START);
-              })
-              .show();
-  }
+    private void showManual(String absUrl, String title) {
+        // 不再拼接！直接使用传进来的完整地址！
+        new ManualDialog(getContext())
+                .title(title)
+                .url(absUrl)
+                .pinToLeft(v -> {
+                    WebView webView = mDocsWebView.getWebView();
+                    webView.loadUrl(absUrl);
+                    // 强制滚动定位（绝杀）
+                    try {
+                        if (absUrl.contains("id=")) {
+                            webView.postDelayed(() -> {
+                                String id = absUrl.split("id=")[1];
+                                webView.evaluateJavascript(
+                                        "document.getElementById('" + id + "').scrollIntoView()",
+                                        null
+                                );
+                            }, 100);
+                        }
+                    } catch (Exception ignored) {
+                        // 出错也不崩溃
+                    }
+                    mDrawerLayout.openDrawer(GravityCompat.START);
 
-   @Override
-   public void onModuleLongClick(Module module) {
-       SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
-       String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
-       DocumentSource source;
-       try {
-           source = DocumentSource.valueOf(name);
-       } catch (IllegalArgumentException e) {
-           source = DocumentSource.DOC_V1;
-       }
+                })
+                .show();
+    }
 
-       String url = module.getUrl();
-       String finalUrl;
-       if (source.isLocal()) {
-           EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
-           finalUrl = "http://localhost:8080/" + url;
-       } else {
-           finalUrl = source.getUri()+ url;
-       }
+    @Override
+    public void onModuleLongClick(Module module) {
+        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
+        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
+        DocumentSource source;
+        try {
+            source = DocumentSource.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            source = DocumentSource.DOC_V1;
+        }
 
-       showManual(finalUrl, module.getName());
-   }
+        String url = module.getUrl();
+        String finalUrl;
+        if (source.isLocal()) {
+            EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
+            finalUrl = "http://localhost:8080/" + url;
+        } else {
+            finalUrl = source.getUri() + url;
+        }
+
+        showManual(finalUrl, module.getName());
+    }
+
     @Override
     public void onPropertyClick(Module m, Property property) {
         String p = property.getKey();
         if (!property.isVariable()) {
             p = p + "()";
         }
+        //全局则,直接插入,否则 键+.+属性名
         if (property.isGlobal()) {
             mEditor.insert(p);
         } else {
             mEditor.insert(m.getName() + "." + p);
         }
+        // 不是是变量
         if (!property.isVariable()) {
-            mEditor.moveCursor(-1);
+            //是否往左移动一格  ture 就是不给移动,  写 false 就是给移动  不写默认false是移动的
+            if (!property.isStationary()) {
+                mEditor.moveCursor(-1);
+            }
         }
+        //隐藏函数面板
         mFunctionsKeyboardHelper.hideFunctionsLayout(true);
     }
 
@@ -791,13 +858,11 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
             finalUrl = "http://localhost:8080/" + url;
         } else {
             // 在线文档：在线地址
-            finalUrl = source.getUri()+ url;
+            finalUrl = source.getUri() + url;
         }
 
         // 4. 打开文档
         showManual(finalUrl, property.getKey());
-
-
 
 
     }

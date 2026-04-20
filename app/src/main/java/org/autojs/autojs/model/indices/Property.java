@@ -22,7 +22,9 @@ public class Property {
 
     @SerializedName("variable")
     private boolean mVariable = false;
-
+    // 光标是否固定位置(针对方法的,是否固定在方法的结尾)
+    @SerializedName("stationary")
+    private boolean mStationary = false;
     public Property() {
     }
 
@@ -57,6 +59,7 @@ public class Property {
         mSummary = summary;
     }
 
+
     public boolean isGlobal() {
         return mGlobal;
     }
@@ -72,4 +75,10 @@ public class Property {
     public void setVariable(boolean variable) {
         mVariable = variable;
     }
+
+    public boolean isStationary() {
+        return mStationary;
+    }
+
+    public void setStationary(boolean stationary) {mStationary = stationary;}
 }
