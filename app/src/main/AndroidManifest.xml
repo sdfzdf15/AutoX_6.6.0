@@ -422,7 +422,7 @@
         </receiver>
 
         <receiver
-            android:name="org.autojs.autojs.KeepAliveService.KeepAliveForegroundService$NotificationCloseReceiver"
+            android:name="org.autojs.autojs.KeepAliveService.NotificationCloseReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="org.autojs.autojs.ACTION_CLOSE_NOTIFICATION" />
