@@ -40,46 +40,62 @@ public class Floaty {
     }
 
     public JsResizableWindow window(BaseResizableFloatyWindow.ViewSupplier supplier) {
+        return window(supplier, 0, 0);
+    }
+
+    public JsResizableWindow window(BaseResizableFloatyWindow.ViewSupplier supplier, int x, int y) {
         try {
             FloatingPermission.waitForPermissionGranted(mContext);
         } catch (InterruptedException e) {
             throw new ScriptInterruptedException();
         }
-        JsResizableWindow window = new JsResizableWindow(supplier);
+        JsResizableWindow window = new JsResizableWindow(supplier, x, y);
         addWindow(window);
         return window;
     }
 
     public JsResizableWindow window(View view) {
+        return window(view, 0, 0);
+    }
+
+    public JsResizableWindow window(View view, int x, int y) {
         try {
             FloatingPermission.waitForPermissionGranted(view.getContext());
         } catch (InterruptedException e) {
             throw new ScriptInterruptedException();
         }
 
-        JsResizableWindow window = new JsResizableWindow((context, parent) -> view);
+        JsResizableWindow window = new JsResizableWindow((context, parent) -> view, x, y);
         addWindow(window);
         return window;
     }
 
     public JsRawWindow rawWindow(RawWindow.RawFloaty floaty) {
+        return rawWindow(floaty, 0, 0);
+    }
+
+    public JsRawWindow rawWindow(RawWindow.RawFloaty floaty, int x, int y) {
         try {
             FloatingPermission.waitForPermissionGranted(mContext);
         } catch (InterruptedException e) {
             throw new ScriptInterruptedException();
         }
-        JsRawWindow window = new JsRawWindow(floaty);
+        JsRawWindow window = new JsRawWindow(floaty, x, y);
         addWindow(window);
         return window;
     }
 
     public JsRawWindow rawWindow(View view) {
+        return rawWindow(view, 0, 0);
+    }
+
+    public JsRawWindow rawWindow(View view, int x, int y) {
         try {
             FloatingPermission.waitForPermissionGranted(mContext);
         } catch (InterruptedException e) {
             throw new ScriptInterruptedException();
         }
-        JsRawWindow window = new JsRawWindow((context, parent) -> view);
+        JsRawWindow window = new JsRawWindow((context, parent) -> view, x, y);
         addWindow(window);
         return window;
     }
@@ -117,7 +133,11 @@ public class Floaty {
         private boolean mExitOnClose;
 
         public JsRawWindow(RawWindow.RawFloaty floaty) {
-            mWindow = new RawWindow(floaty, mUiHandler.getContext());
+            this(floaty, 0, 0);
+        }
+
+        public JsRawWindow(RawWindow.RawFloaty floaty, int x, int y) {
+            mWindow = new RawWindow(floaty, mUiHandler.getContext(), x, y);
             mUiHandler.getContext().startService(new Intent(mUiHandler.getContext(), FloatyService.class));
             Runnable r=() -> {
                 FloatyService.addWindow(mWindow);
@@ -209,10 +229,14 @@ public class Floaty {
         private boolean mExitOnClose = false;
 
         public JsResizableWindow(BaseResizableFloatyWindow.ViewSupplier supplier) {
+            this(supplier, 0, 0);
+        }
+
+        public JsResizableWindow(BaseResizableFloatyWindow.ViewSupplier supplier, int x, int y) {
             mWindow = new BaseResizableFloatyWindow(mContext, (context, parent) -> {
                 mView = supplier.inflate(context, parent);
                 return mView;
-            });
+            }, x, y);
             mUiHandler.getContext().startService(new Intent(mUiHandler.getContext(), FloatyService.class));
             Runnable r = () -> {
                 FloatyService.addWindow(mWindow);

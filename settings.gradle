@@ -1,8 +1,6 @@
 pluginManagement {
     repositories {
-        // 华为云
-        maven { url = uri("https://mirrors.huaweicloud.com/repository/maven/") }
-        maven { url = uri("https://mirrors.huaweicloud.com/google/") }
+
         // 网易云
         maven { url = uri("https://mirrors.163.com/maven/") }
 
@@ -28,9 +26,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
 
-        // 华为云
-        maven { url = uri("https://mirrors.huaweicloud.com/repository/maven/") }
-        maven { url = uri("https://mirrors.huaweicloud.com/google/") }
+
         // 网易云
         maven { url = uri("https://mirrors.163.com/maven/") }
 // 5. 教育网镜像（清华、中科大）

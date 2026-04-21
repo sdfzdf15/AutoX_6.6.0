@@ -16,7 +16,7 @@ import com.stardust.enhancedfloaty.util.WindowTypeCompat
 import com.stardust.lib.R.layout
 
 
-class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : FloatyWindow() {
+class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier, private val initialX: Int = 0, private val initialY: Int = 0) : FloatyWindow() {
     interface ViewSupplier {
         fun inflate(context: Context?, parent: ViewGroup?): View
     }
@@ -53,6 +53,8 @@ class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : 
         val layoutParams =
             WindowManager.LayoutParams(-2, -2, WindowTypeCompat.getPhoneWindowType(), 520, -3)
         layoutParams.gravity = 8388659
+        layoutParams.x = initialX
+        layoutParams.y = initialY
         return layoutParams
     }
 

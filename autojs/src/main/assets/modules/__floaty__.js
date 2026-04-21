@@ -2,30 +2,44 @@
 module.exports = function(runtime, global){
     var floaty = {};
 
-    floaty.window = function(xml){
+    floaty.window = function(xml, x, y){
         if(typeof(xml) == 'xml'){
             xml = xml.toXMLString();
         }
         let window;
          ui.run(()=>{
-         window = wrap(runtime.floaty.window(function(context, parent){
-                      runtime.ui.layoutInflater.setContext(context);
-                      return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
-                 }));
+         if(x !== undefined && y !== undefined){
+             window = wrap(runtime.floaty.window(function(context, parent){
+                          runtime.ui.layoutInflater.setContext(context);
+                          return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
+                     }, x, y));
+         } else {
+             window = wrap(runtime.floaty.window(function(context, parent){
+                          runtime.ui.layoutInflater.setContext(context);
+                          return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
+                     }));
+         }
          })
         return window;
     }
 
-    floaty.rawWindow = function(xml){
+    floaty.rawWindow = function(xml, x, y){
         if(typeof(xml) == 'xml'){
             xml = xml.toXMLString();
         }
         let window;
         ui.run(()=>{
-        window = wrap(runtime.floaty.rawWindow(function(context, parent){
-             runtime.ui.layoutInflater.setContext(context);
-             return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
-        }));
+        if(x !== undefined && y !== undefined){
+            window = wrap(runtime.floaty.rawWindow(function(context, parent){
+                 runtime.ui.layoutInflater.setContext(context);
+                 return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
+            }, x, y));
+        } else {
+            window = wrap(runtime.floaty.rawWindow(function(context, parent){
+                 runtime.ui.layoutInflater.setContext(context);
+                 return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
+            }));
+        }
         })
         return window;
     }
@@ -52,7 +66,7 @@ module.exports = function(runtime, global){
         };
         return proxyObject;
     }
-    
+
     floaty.closeAll = runtime.floaty.closeAll.bind(runtime.floaty);
 
     floaty.checkPermission = runtime.floaty.checkPermission.bind(runtime.floaty);
