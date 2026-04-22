@@ -64,6 +64,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: 'build/app/signed/**'
+          draft: false
+          prerelease: false
       - name: setup aliyun oss
         if: github.repository == 'kkevsekk1/AutoX'
         uses: manyuanrong/setup-ossutil@master
