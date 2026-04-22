@@ -1102,7 +1102,7 @@
         "url": "#/events?id=eventemittersetmaxlistenersn",
         "summary": "设置最大监听函数数量"
       }
-      ]
+    ]
   },
   {
     "name": "files",
@@ -1596,12 +1596,12 @@
       },
       {
         "key": "window",
-        "url": "#/floaty?id=floatywindowlayout",
+        "url": "#/floaty?id=floatywindowlayout-x-0-y-0",
         "summary": "悬浮窗(带按键)"
       },
       {
         "key": "rawWindow",
-        "url": "#/floaty?id=floatyrawwindowlayout",
+        "url": "#/floaty?id=floatyrawwindowlayout-x-0-y-0",
         "summary": "原始悬浮窗"
       },
       {
