@@ -256,9 +256,12 @@ public class EditorMenu {
                 .content(info)
                 .show();
     }
-
     private void copyLine() {
         mEditor.copyLine();
+    }
+
+    private void smartCopy() {
+        mEditor.smartCopy();
     }
 
 

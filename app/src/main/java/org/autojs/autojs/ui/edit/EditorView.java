@@ -24,8 +24,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -87,7 +90,6 @@ import java.util.Objects;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
 /**
  * Created by Stardust on 2017/9/28.
  */
@@ -101,24 +103,65 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
     public static final String EXTRA_READ_ONLY = "readOnly";
     public static final String EXTRA_SAVE_ENABLED = "saveEnabled";
     public static final String EXTRA_RUN_ENABLED = "runEnabled";
+
     @ViewById(R.id.editor)
     CodeEditor mEditor;
+
     @ViewById(R.id.code_completion_bar)
     CodeCompletionBar mCodeCompletionBar;
+
     @ViewById(R.id.input_method_enhance_bar)
     View mInputMethodEnhanceBar;
+
     @ViewById(R.id.symbol_bar)
     CodeCompletionBar mSymbolBar;
+
     @ViewById(R.id.functions)
     ImageView mShowFunctionsButton;
+
     @ViewById(R.id.functions_keyboard)
     FunctionsKeyboardView mFunctionsKeyboard;
+
     @ViewById(R.id.debug_bar)
     DebugBar mDebugBar;
+
     @ViewById(R.id.docs)
     EWebView mDocsWebView;
+
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
+
+    @ViewById(R.id.toggle_change)
+    ImageView mToggleChange;
+
+    @ViewById(R.id.first_row_buttons)
+    LinearLayout mFirstRowButtons;
+
+    @ViewById(R.id.second_row_buttons)
+    LinearLayout mSecondRowButtons;
+
+    @ViewById(R.id.toggled_select)
+    ImageView mToggledSelect;
+
+    @ViewById(R.id.toggled_up)
+    ImageView mToggledUp;
+
+    @ViewById(R.id.toggled_copy)
+    ImageView mToggledCopy;
+
+    @ViewById(R.id.toggled_space)
+    ImageView mToggledSpace;
+
+    @ViewById(R.id.toggled_left)
+    ImageView mToggledLeft;
+
+    @ViewById(R.id.toggled_down)
+    ImageView mToggledDown;
+
+    @ViewById(R.id.toggled_right)
+    ImageView mToggledRight;
+
+    private int mSelectionLevel = 0;
     private String mName;
     private Uri mUri;
     private boolean mReadOnly = false;
@@ -126,6 +169,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
     private AutoCompletion mAutoCompletion;
     private Theme mEditorTheme;
     private FunctionsKeyboardHelper mFunctionsKeyboardHelper;
+
     private BroadcastReceiver mOnRunFinishedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -277,6 +321,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         setUpInputMethodEnhancedBar();
         setUpFunctionsKeyboard();
         setMenuItemStatus(R.id.save, false);
+        setToggle_change(); // 设置切换按钮点击监听
 
 
        /* if (mDocsWebView.getIsTbs()) {
@@ -866,6 +911,523 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
 
     }
+
+    // @+id/toggle_change onToggle_changeClick
+    public void setToggle_change() {
+        // 从偏好设置中读取切换状态并恢复
+        SharedPreferences sp = getContext().getSharedPreferences("EditorView", Context.MODE_PRIVATE);
+        boolean isToggled = sp.getBoolean("toggle_state", false);
+        if (isToggled) {
+            // 如果之前是切换状态，切换到显示控制按钮
+            mCodeCompletionBar.setVisibility(View.GONE);
+            mFirstRowButtons.setVisibility(View.VISIBLE);
+            mSecondRowButtons.setVisibility(View.VISIBLE);
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSymbolBar.getLayoutParams();
+            params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+            params.addRule(RelativeLayout.RIGHT_OF, R.id.first_row_buttons);
+            params.height = dpToPx(70);
+            mSymbolBar.setLayoutParams(params);
+        }
+
+        mToggleChange.setOnClickListener(v -> {
+            // 切换代码补全栏和控制按钮的可见性
+            if (mCodeCompletionBar.getVisibility() == View.VISIBLE) {
+                // 隐藏代码补全栏，显示控制按钮
+                mCodeCompletionBar.setVisibility(View.GONE);// 代码补全栏隐藏
+                mFirstRowButtons.setVisibility(View.VISIBLE);// 第一行按钮显示
+                mSecondRowButtons.setVisibility(View.VISIBLE);// 第二行按钮显示
+
+                // 设置symbol_bar在复制按钮右边
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSymbolBar.getLayoutParams();
+                params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                // params.removeRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE); // 靠顶部
+                params.addRule(RelativeLayout.RIGHT_OF, R.id.first_row_buttons); // 设置在第一行按钮的右边
+                // 设置高度为35dp
+                params.height = dpToPx(70);
+                mSymbolBar.setLayoutParams(params);
+
+                // 保存切换状态
+                sp.edit().putBoolean("toggle_state", true).apply();
+            } else {
+
+                mFirstRowButtons.setVisibility(View.GONE);// 第一行按钮隐藏
+                mSecondRowButtons.setVisibility(View.GONE);// 第二行按钮隐藏
+
+                // 恢复symbol_bar到默认位置
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSymbolBar.getLayoutParams();
+                params.removeRule(RelativeLayout.RIGHT_OF);
+                params.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
+                // params.addRule(RelativeLayout.BELOW, R.id.functions); // 设置在functions的下边
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE); // 靠底部
+                // params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+                // 设置高度为35dp
+                params.height = dpToPx(35);
+                mSymbolBar.setLayoutParams(params);
+                // 显示代码补全栏，隐藏控制按钮
+                mCodeCompletionBar.setVisibility(View.VISIBLE);// 代码补全栏显示
+
+                // 保存切换状态
+                sp.edit().putBoolean("toggle_state", false).apply();
+            }
+        });
+
+        // 设置控制按钮的点击监听
+        setControlButtonListeners();
+    }
+
+    /**
+     * 将 dp 值转换为像素值
+     *
+     * @param dp dp 值
+     * @return 像素值
+     */
+    private int dpToPx(int dp) {
+        return (int) (dp * getContext().getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    private void setControlButtonListeners() {
+        // 选择按钮点击事件 - 智能递进式选择
+        mToggledSelect.setOnClickListener(v -> {
+            EditText editText = mEditor.getCodeEditText();
+            int start = editText.getSelectionStart();
+            int end = editText.getSelectionEnd();
+
+            // 重置选择层级如果没有选择或选择范围发生变化
+            if (start == end) {
+                mSelectionLevel = 0;
+            }
+
+            mSelectionLevel++;
+
+            switch (mSelectionLevel) {
+                case 1:
+                    // 第1层：选择当前单词
+                    selectCurrentWord(editText);
+                    break;
+                case 2:
+                    // 第2层：选择当前行
+                    selectCurrentLine(editText);
+                    break;
+                case 3:
+                    // 第3层：选择括号对
+                    selectBracketPair(editText);
+                    break;
+                case 4:
+                    // 第4层：选择函数
+                    selectCurrentFunction(editText);
+                    break;
+                case 5:
+                    // 第5层：选择整个文件
+                    selectEntireFile(editText);
+                    break;
+                default:
+                    // 重置选择层级
+                    mSelectionLevel = 1;
+                    selectCurrentWord(editText);
+                    break;
+            }
+        });
+
+        // 上移按钮点击事件
+        mToggledUp.setOnClickListener(v -> {
+            mEditor.moveUpLine();
+        });
+
+        // 复制按钮点击事件
+        mToggledCopy.setOnClickListener(v -> {
+            mEditor.smartCopy();
+        });
+
+        // 空格键点击事件
+        mToggledSpace.setOnClickListener(v -> {
+            mEditor.insert("\t");
+        });
+
+        // 左移按钮点击事件
+        mToggledLeft.setOnClickListener(v -> {
+            mEditor.moveCursor(-1);
+        });
+
+        // 下移按钮点击事件
+        mToggledDown.setOnClickListener(v -> {
+            mEditor.moveDownLine();
+        });
+
+        // 右移按钮点击事件
+        mToggledRight.setOnClickListener(v -> {
+            mEditor.moveCursor(1);
+        });
+    }
+
+    /**
+     * 选择当前单词（智能识别编程语言标识符），如果没有单词则选择整行
+     */
+    private void selectCurrentWord(EditText editText) {
+        int start = editText.getSelectionStart();
+        CharSequence text = editText.getText();
+
+        // 智能识别：包括字母、数字、下划线、美元符号、中文等
+        while (start > 0 && isIdentifierChar(text.charAt(start - 1))) {
+            start--;
+        }
+
+        int end = editText.getSelectionEnd();
+        while (end < text.length() && isIdentifierChar(text.charAt(end))) {
+            end++;
+        }
+
+        // 如果没有选择到任何内容，选择整行
+        if (start == end) {
+            int line = editText.getLayout().getLineForOffset(start);
+            int lineStart = editText.getLayout().getLineStart(line);
+            int lineEnd = editText.getLayout().getLineEnd(line);
+            editText.setSelection(lineStart, lineEnd);
+           // Toast.makeText(getContext(), "已选择行", Toast.LENGTH_SHORT).show();
+            mSelectionLevel = 1; // 重置选择层级，下次点击会重新从单词开始
+        } else {
+            editText.setSelection(start, end);
+           // Toast.makeText(getContext(), "已选择单词", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * 判断字符是否为标识符字符（编程语言中的变量名字符）
+     */
+    private boolean isIdentifierChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_' || c == '$' || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS;
+    }
+
+    /**
+     * 选择当前行
+     */
+    private void selectCurrentLine(EditText editText) {
+        int start = editText.getSelectionStart();
+        int line = editText.getLayout().getLineForOffset(start);
+        int lineStart = editText.getLayout().getLineStart(line);
+        int lineEnd = editText.getLayout().getLineEnd(line);
+        editText.setSelection(lineStart, lineEnd);
+       // Toast.makeText(getContext(), "已选择行", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 选择括号对（使用栈算法，参考 VSCode 实现）
+     */
+    private void selectBracketPair(EditText editText) {
+        int cursor = editText.getSelectionStart();
+        CharSequence text = editText.getText();
+
+        // 查找光标所在位置最近的括号对
+        int[] bracketPair = findBracketPair(text, cursor);
+
+        if (bracketPair != null) {
+            editText.setSelection(bracketPair[0], bracketPair[1] + 1);
+           // Toast.makeText(getContext(), "已选择括号对", Toast.LENGTH_SHORT).show();
+        } else {
+            // 如果没有找到括号对，尝试选择代码块
+            selectCodeBlock(editText);
+        }
+    }
+
+    /**
+     * 查找包含光标的括号对（栈算法，参考 VSCode 实现）
+     */
+    private int[] findBracketPair(CharSequence text, int cursor) {
+        final String brackets = "(){}[]";
+        java.util.Stack<int[]> stack = new java.util.Stack<>();
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            int bracketIndex = brackets.indexOf(c);
+
+            if (bracketIndex != -1) {
+                if (bracketIndex % 2 == 0) {
+                    // 左括号入栈
+                    stack.push(new int[]{i, bracketIndex});
+                } else {
+                    // 右括号，尝试匹配
+                    if (!stack.isEmpty()) {
+                        int[] top = stack.peek();
+                        if (top[1] == bracketIndex - 1) {
+                            stack.pop();
+                            int start = top[0];
+                            int end = i;
+                            if (cursor >= start && cursor <= end) {
+                                return new int[]{start, end};
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 选择代码块（找不到括号对时的回退方案）
+     */
+    private void selectCodeBlock(EditText editText) {
+        int cursor = editText.getSelectionStart();
+        CharSequence text = editText.getText();
+
+        // 找到光标所在行的信息
+        int line = editText.getLayout().getLineForOffset(cursor);
+        int lineStart = editText.getLayout().getLineStart(line);
+
+        // 查找当前行之前的非空字符
+        int blockStart = lineStart;
+        for (int i = lineStart; i < cursor && i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '{' || c == '[' || c == '(') {
+                blockStart = i;
+                break;
+            }
+            if (!Character.isWhitespace(c)) {
+                break;
+            }
+        }
+
+        // 使用栈匹配算法找到对应的结束括号
+        int blockEnd = findMatchingBlockEnd(text, blockStart);
+
+        if (blockEnd == -1) {
+            // 如果没有找到匹配的块，选择整行
+            int lineEnd = editText.getLayout().getLineEnd(line);
+            editText.setSelection(lineStart, lineEnd);
+            //Toast.makeText(getContext(), "已选择行", Toast.LENGTH_SHORT).show();
+        } else {
+            // 选择从开始括号到结束括号的内容
+            editText.setSelection(blockStart, blockEnd + 1);
+           // Toast.makeText(getContext(), "已选择代码块", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * 使用栈算法找到块的结束位置
+     */
+    private int findMatchingBlockEnd(CharSequence text, int start) {
+        if (start >= text.length()) return -1;
+
+        char startChar = text.charAt(start);
+        char expectedEnd = getMatchingBracket(startChar);
+        if (expectedEnd == 0) return -1;
+
+        int depth = 1;
+        for (int i = start + 1; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == startChar) {
+                depth++;
+            } else if (c == expectedEnd) {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 获取匹配的括号字符
+     */
+    private char getMatchingBracket(char bracket) {
+        switch (bracket) {
+            case '{': return '}';
+            case '[': return ']';
+            case '(': return ')';
+            case '}': return '{';
+            case ']': return '[';
+            case ')': return '(';
+            default: return 0;
+        }
+    }
+
+    /**
+     * 选择匹配的括号对
+     */
+    private void selectMatchingBrackets(EditText editText) {
+        int cursor = editText.getSelectionStart();
+        CharSequence text = editText.getText();
+
+        if (cursor <= 0 || cursor >= text.length()) {
+          // Toast.makeText(getContext(), "无法找到匹配的括号", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        char c = text.charAt(cursor);
+        int start = -1, end = -1;
+
+        // 检查光标是否在括号上
+        if (isBracket(c)) {
+            if (isOpeningBracket(c)) {
+                // 光标在开始括号上，查找结束括号
+                start = cursor;
+                end = findMatchingBracketEnd(text, cursor);
+            } else {
+                // 光标在结束括号上，查找开始括号
+                end = cursor;
+                start = findMatchingBracketStart(text, cursor);
+            }
+        } else {
+            // 光标不在括号上，检查前一个和后一个字符
+            char prev = text.charAt(cursor - 1);
+            char next = text.charAt(cursor);
+
+            if (isBracket(prev)) {
+                if (isOpeningBracket(prev)) {
+                    start = cursor - 1;
+                    end = findMatchingBracketEnd(text, cursor - 1);
+                } else {
+                    end = cursor - 1;
+                    start = findMatchingBracketStart(text, cursor - 1);
+                }
+            } else if (isBracket(next)) {
+                if (isOpeningBracket(next)) {
+                    start = cursor;
+                    end = findMatchingBracketEnd(text, cursor);
+                } else {
+                    end = cursor;
+                    start = findMatchingBracketStart(text, cursor);
+                }
+            }
+        }
+
+        if (start != -1 && end != -1) {
+            // 包括括号本身
+            editText.setSelection(start, end + 1);
+            //Toast.makeText(getContext(), "已选择括号对", Toast.LENGTH_SHORT).show();
+        } else {
+            //Toast.makeText(getContext(), "无法找到匹配的括号", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * 判断是否为括号字符
+     */
+    private boolean isBracket(char c) {
+        return c == '{' || c == '[' || c == '(' || c == '}' || c == ']' || c == ')';
+    }
+
+    /**
+     * 判断是否为开始括号
+     */
+    private boolean isOpeningBracket(char c) {
+        return c == '{' || c == '[' || c == '(';
+    }
+
+    /**
+     * 查找结束括号的位置（使用栈算法）
+     */
+    private int findMatchingBracketEnd(CharSequence text, int start) {
+        return findMatchingBlockEnd(text, start);
+    }
+
+    /**
+     * 查找开始括号的位置
+     */
+    private int findMatchingBracketStart(CharSequence text, int end) {
+        if (end >= text.length()) return -1;
+
+        char endChar = text.charAt(end);
+        char expectedStart = getMatchingBracket(endChar);
+        if (expectedStart == 0) return -1;
+
+        int depth = 1;
+        for (int i = end - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (c == expectedStart) {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            } else if (isBracket(c) && !isOpeningBracket(c)) {
+                // 遇到嵌套的结束括号，深度增加
+                depth++;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 选择当前函数（参考 VSCode 的函数识别算法）
+     */
+    private void selectCurrentFunction(EditText editText) {
+        int cursor = editText.getSelectionStart();
+        int line = editText.getLayout().getLineForOffset(cursor);
+        CharSequence text = editText.getText();
+
+        // 从当前行向上查找函数定义
+        for (int i = line; i >= 0; i--) {
+            int lineStart = editText.getLayout().getLineStart(i);
+            int lineEnd = editText.getLayout().getLineEnd(i);
+            String lineText = text.subSequence(lineStart, lineEnd).toString();
+
+            // 匹配函数定义：function、class、const/let/var + 函数名
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                    "\\b(function|class|const\\s+\\w+\\s*=|let\\s+\\w+\\s*=|var\\s+\\w+\\s*=|=>)\\s*\\w*\\s*\\("
+            );
+            java.util.regex.Matcher matcher = pattern.matcher(lineText);
+
+            if (matcher.find()) {
+                // 找到函数定义，查找函数体的结束大括号
+                int functionStart = lineStart + matcher.start();
+                int functionEnd = findFunctionEnd(text, functionStart);
+
+                if (functionEnd != -1) {
+                    editText.setSelection(functionStart, functionEnd + 1);
+                    //Toast.makeText(getContext(), "已选择函数", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+        }
+
+        // 如果没有找到函数，选择整个文件
+        selectEntireFile(editText);
+        //Toast.makeText(getContext(), "已选择整个文件", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 查找函数体的结束位置（大括号计数，参考 VSCode 实现）
+     */
+    private int findFunctionEnd(CharSequence text, int start) {
+        // 找到起始大括号
+        int braceStart = -1;
+        for (int i = start; i < text.length(); i++) {
+            if (text.charAt(i) == '{') {
+                braceStart = i;
+                break;
+            }
+        }
+
+        if (braceStart == -1) return -1;
+
+        // 使用栈算法计算大括号匹配
+        int depth = 1;
+        for (int i = braceStart + 1; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '{') {
+                depth++;
+            } else if (c == '}') {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * 选择整个文件
+     */
+    private void selectEntireFile(EditText editText) {
+        editText.selectAll();
+       // Toast.makeText(getContext(), "已选择整个文件", Toast.LENGTH_SHORT).show();
+    }
+
 
     public int getScriptExecutionId() {
         return mScriptExecutionId;

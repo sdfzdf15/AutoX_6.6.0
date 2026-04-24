@@ -25,7 +25,7 @@
             <FrameLayout
                 android:id="@+id/toolbar_menu"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
 
         </com.stardust.theme.widget.ThemeColorToolbar>
 
@@ -51,13 +51,13 @@
                 android:gravity="start"
                 android:paddingStart="10dp"
                 android:textColor="@android:color/white"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
 
             <org.autojs.autojs.ui.edit.editor.CodeEditor
                 android:id="@+id/editor"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
 
             <RelativeLayout
@@ -70,7 +70,7 @@
                     android:id="@+id/symbol_bar"
                     android:layout_width="match_parent"
                     android:layout_height="35dp"
-                    android:layout_alignParentBottom="true"/>
+                    android:layout_alignParentBottom="true" />
 
                 <ImageView
                     android:id="@+id/functions"
@@ -82,7 +82,90 @@
                     android:padding="6dp"
                     android:src="@drawable/ic_ali_fx"
                     app:tint="#222329" />
+                <!-- 第一行按键 -->
+                <LinearLayout
+                    android:id="@+id/first_row_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:visibility="gone"
+                    android:orientation="horizontal"
+                    android:layout_toRightOf="@+id/functions"
+                    android:layout_alignParentTop="true">
 
+                    <ImageView
+                        android:id="@+id/toggled_select"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/btn_selector"
+                        android:src="@drawable/ic_transform_black_48dp"
+                        app:tint="@android:color/secondary_text_light" />
+                    <ImageView
+                        android:id="@+id/toggled_up"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/btn_selector"
+                        android:src="@drawable/ic_keyboard_arrow_up_black_48dp"
+                        app:tint="@android:color/secondary_text_light" />
+                    <ImageView
+                        android:id="@+id/toggled_copy"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/btn_selector"
+                        android:src="@drawable/ic_content_copy_black_48dp"
+                        app:tint="@android:color/secondary_text_light" />
+                </LinearLayout>
+                <!-- 第二行按键 -->
+                <LinearLayout
+                    android:id="@+id/second_row_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:visibility="gone"
+                    android:orientation="horizontal"
+                    android:layout_below="@+id/functions"
+                    android:layout_alignParentBottom="true">
+
+                    <ImageView
+                        android:id="@+id/toggled_space"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/btn_selector"
+                        android:src="@drawable/ic_space_bar_black_48dp"
+                        app:tint="@android:color/secondary_text_light" />
+                    <ImageView
+                        android:id="@+id/toggled_left"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/btn_selector"
+                        android:src="@drawable/ic_keyboard_arrow_left_black_48dp"
+                        app:tint="@android:color/secondary_text_light" />
+                    <ImageView
+                        android:id="@+id/toggled_down"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/btn_selector"
+                        android:src="@drawable/ic_keyboard_arrow_down_black_48dp"
+                        app:tint="@android:color/secondary_text_light" />
+                    <ImageView
+                        android:id="@+id/toggled_right"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/btn_selector"
+                        android:src="@drawable/ic_keyboard_arrow_right_black_48dp"
+                        app:tint="@android:color/secondary_text_light" />
+                </LinearLayout>
                 <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
                     android:id="@+id/code_completion_bar"
                     android:layout_width="match_parent"
@@ -90,22 +173,31 @@
                     android:layout_above="@+id/symbol_bar"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/functions"/>
-
+                    android:layout_toRightOf="@+id/functions" />
+                <!-- 切换按钮 -->
+                <ImageView
+                    android:id="@+id/toggle_change"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:src="@drawable/ic_swap_horiz_black_48dp"
+                    android:background="@drawable/btn_selector"
+                    app:tint="#808080" />
             </RelativeLayout>
 
             <org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
                 android:id="@+id/functions_keyboard"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
 
             <org.autojs.autojs.ui.edit.debug.DebugBar
                 android:id="@+id/debug_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -113,7 +205,7 @@
             android:id="@+id/docs"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="start"/>
+            android:layout_gravity="start" />
     </androidx.drawerlayout.widget.DrawerLayout>
 
 </LinearLayout>

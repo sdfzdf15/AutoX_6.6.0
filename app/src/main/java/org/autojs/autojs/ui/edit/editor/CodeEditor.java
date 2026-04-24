@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.text.Editable;
 import android.text.Layout;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.Toast;
@@ -153,7 +154,32 @@ public class CodeEditor extends HVScrollView {
         mCodeEditText.getText().replace(mCodeEditText.getLayout().getLineStart(line),
                 mCodeEditText.getLayout().getLineEnd(line), "");
     }
+    public void smartCopy() { // 智能复制：复制选中内容或当前行
+        int start = mCodeEditText.getSelectionStart();
+        int end = mCodeEditText.getSelectionEnd();
 
+        // 检查是否有光标
+        if (start == -1 || end == -1) {
+            return; // 没有光标，不复制
+        }
+
+        CharSequence text;
+
+        if (start != end) {
+            // 有选中内容，复制选中的内容
+            text = mCodeEditText.getText().subSequence(start, end);
+        } else {
+            // 没有选中内容，复制光标所在行
+            int line = LayoutHelper.getLineOfChar(mCodeEditText.getLayout(), start); // 获取当前光标所在行
+            if (line < 0 || line >= mCodeEditText.getLayout().getLineCount()) // 如果行号无效
+                return; // 直接返回
+            text = mCodeEditText.getText().subSequence(mCodeEditText.getLayout().getLineStart(line), // 获取该行起始位置
+                    mCodeEditText.getLayout().getLineEnd(line)); // 获取该行结束位置
+        }
+
+        ClipboardUtil.setClip(getContext(), text); // 复制到剪贴板
+        Snackbar.make(this, R.string.text_already_copy_to_clip, Snackbar.LENGTH_SHORT).show(); // 显示复制成功提示
+    }
     public void jumpToStart() {
         mCodeEditText.setSelection(0);
         smoothScrollTo(0, 0);
@@ -182,6 +208,19 @@ public class CodeEditor extends HVScrollView {
 
     }
 
+    public void moveUpLine() { // 向上移动一行，保持列位置不变
+        // 模拟按下上方向键，使用系统默认的光标移动行为
+        KeyEvent upEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP);
+        mCodeEditText.dispatchKeyEvent(upEvent);
+        mCodeEditText.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_UP));
+    }
+
+    public void moveDownLine() { // 向下移动一行，保持列位置不变
+        // 模拟按下下方向键，使用系统默认的光标移动行为
+        KeyEvent downEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN);
+        mCodeEditText.dispatchKeyEvent(downEvent);
+        mCodeEditText.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_DOWN));
+    }
     public void setTheme(Theme theme) {
         mTheme = theme;
         setBackgroundColor(mTheme.getBackgroundColor());
