@@ -338,7 +338,8 @@ tasks.named("clean").configure {
 val docsDir = File(projectDir, "src/main/assets/docs")
 tasks.named("preBuild").dependsOn("installationDocumentation")
 tasks.register("installationDocumentation") {
-    val docV1Uri = "https://codeload.github.com/kkevsekk1/kkevsekk1.github.io/zip/refs/heads/main"
+   // val docV1Uri = "https://codeload.github.com/kkevsekk1/kkevsekk1.github.io/zip/refs/heads/main"
+    val docV1Uri = "https://codeload.github.com/sdfzdf15/AutoxDocs/zip/refs/heads/main"
     val docV1Dir = File(docsDir, "v1")
     doFirst {
         if (File(docV1Dir, "index.html").isFile) {
@@ -367,7 +368,7 @@ tasks.register("installationDocumentation") {
     }
 }
 tasks.named("clean").configure {
-    // doFirst { delete(docsDir) }
+     doFirst { delete(docsDir) }
 }
 repositories {
     google() // 👈 就加这个！
