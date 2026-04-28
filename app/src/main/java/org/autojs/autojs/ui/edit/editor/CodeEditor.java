@@ -97,6 +97,15 @@ public class CodeEditor extends HVScrollView {
         mJavaScriptHighlighter = new JavaScriptHighlighter(mTheme, mCodeEditText);
         mJsBeautifier = new JsBeautifier(this, "js/js-beautify");
         detector = new ScaleGestureDetector(getContext(),getScaleGestureListener());
+        // 注册文本选区取消回调，重置光标列位置变量
+        mCodeEditText.setSelectionClearCallback(() -> {
+            if (mInitialStartCursorCol != null) {
+                mInitialStartCursorCol = null;
+            }
+            if (mInitialEndCursorCol != null) {
+                mInitialEndCursorCol = null;
+            }
+        });
     }
 
     public ScaleGestureDetector.OnScaleGestureListener getScaleGestureListener() {
@@ -185,6 +194,10 @@ public class CodeEditor extends HVScrollView {
 
         ClipboardUtil.setClip(getContext(), text); // 复制到剪贴板
         Snackbar.make(this, R.string.text_already_copy_to_clip, Snackbar.LENGTH_SHORT).show(); // 显示复制成功提示
+        // 复制完成后取消文本选取（将光标移动到选区起始位置）
+        if (start != end) {
+            mCodeEditText.setSelection(start);
+        }
     }
     public void jumpToStart() {
         mCodeEditText.setSelection(0);
@@ -272,7 +285,7 @@ public class CodeEditor extends HVScrollView {
                 int prevLineEnd = mCodeEditText.getLayout().getLineEnd(prevLine); // 上一行最后一个字符在整个文本中的位置(索引)
                 // 计算上一行的长度
                 int prevLineLength = prevLineEnd - prevLineStart;
-                if (prevLine == startLine && mInitialEndCursorCol <= mInitialStartCursorCol) {
+                if (prevLine == startLine && (mInitialEndCursorCol <= mInitialStartCursorCol || prevLineLength < mInitialEndCursorCol)) {
                     return;
                 } else {
                     // 如果该行以换行符结尾，减去1
@@ -294,8 +307,8 @@ public class CodeEditor extends HVScrollView {
             }
 
         } else {
-            mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
-            mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
+//            mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
+//            mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
             // 使用系统默认的光标移动行为
             KeyEvent upEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP);
             mCodeEditText.dispatchKeyEvent(upEvent);
@@ -357,7 +370,8 @@ public class CodeEditor extends HVScrollView {
                 int nextLineEnd = mCodeEditText.getLayout().getLineEnd(nextLine); // 下一行的结束位置(列索引),表示下一行最后一个字符在整个文本中的位置
                 // 计算下一行文本的长度
                 int nextLineLength = nextLineEnd - nextLineStart;
-                if (nextLine == endLine && mInitialStartCursorCol >= mInitialEndCursorCol) {
+                if (nextLine == endLine && (mInitialStartCursorCol >= mInitialEndCursorCol
+                        || nextLineLength < mInitialStartCursorCol)) {
                     return;
                 } else {
                     // 如果该行以换行符结尾，减去1
@@ -379,8 +393,8 @@ public class CodeEditor extends HVScrollView {
 
             }
         } else {
-            mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
-            mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
+//            mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
+//            mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
 
             // 使用系统默认的光标移动行为
             KeyEvent downEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN);
@@ -597,8 +611,8 @@ public class CodeEditor extends HVScrollView {
     }
 
     public void moveCursor(int dCh, int left_right_Active) { // 移动光标
-        int start = mCodeEditText.getSelectionStart();
-        int end = mCodeEditText.getSelectionEnd();
+        int start = mCodeEditText.getSelectionStart();// 这个值是从文本开头开始计算的字符偏移量，从 0 开始计数 (选中文本的起始位置'开始箭头'的索引)
+        int end = mCodeEditText.getSelectionEnd();// 这个值是从文本开头开始计算的字符偏移量，从 0 开始计数 (选中文本的结束位置'结束箭头'的索引)
         boolean hasSelection = start != end;
 
         if (hasSelection) {
@@ -618,16 +632,20 @@ public class CodeEditor extends HVScrollView {
                 }
             } else if (left_right_Active == 1) {// 为1时，左移按钮增加左光标选择范围，右移按钮减少左光标选择范围
                 // 有选择时，调整选择范围
-                if (dCh > 0) {
+                if (dCh > 0) {//左光标右移动,缩小
                     mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
                     // 向右移动，扩展选择
                     int newStart = Math.min(start + dCh, mCodeEditText.getText().length());
-                    mCodeEditText.setSelection(newStart, end);
+                    if(newStart != end){
+                        mCodeEditText.setSelection(newStart, end);
+                    }
                 } else {
                     mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
                     // 向左移动，收缩选择
                     int newStart = Math.max(start + dCh, 0);
-                    mCodeEditText.setSelection(newStart, end);
+                    if(newStart != start){
+                        mCodeEditText.setSelection(newStart, end);
+                    }
                 }
             } else if (left_right_Active == 2) {// 为2时，左移按钮减少右光标选择范围，右移按钮增加右光标选择范围
                 // 有选择时，调整选择范围
@@ -635,18 +653,22 @@ public class CodeEditor extends HVScrollView {
                     mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
                     // 向右移动，扩展选择
                     int newEnd = Math.min(end + dCh, mCodeEditText.getText().length());
-                    mCodeEditText.setSelection(start, newEnd);
+                    if(newEnd != end){
+                        mCodeEditText.setSelection(start, newEnd);
+                    }
                 } else {
                     mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
                     // 向左移动，收缩选择
                     int newEnd = Math.max(end + dCh, 0);
-                    mCodeEditText.setSelection(start, newEnd);
+                    if(newEnd != start){
+                        mCodeEditText.setSelection(start, newEnd);
+                    }
                 }
             }
         } else {
-            // 无选择时，重置光标位置
-            mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
-            mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
+//            // 无选择时，重置光标位置
+//            mInitialStartCursorCol = null; // 重置左光标所在行中的列位置
+//            mInitialEndCursorCol = null; // 重置右光标所在行中的列位置
             // 无选择时，移动光标
             int newPos = Math.max(0, Math.min(start + dCh, mCodeEditText.getText().length()));
             mCodeEditText.setSelection(newPos);

@@ -356,12 +356,29 @@ public class CodeEditText extends AppCompatEditText {
         return mParentScrollView.getScrollX() + getScrollX();
     }
 
+    /**
+     * 文本选区取消回调接口
+     */
+    public interface SelectionClearCallback {
+        void onSelectionCleared();
+    }
+
+    private SelectionClearCallback mSelectionClearCallback;
+
+    public void setSelectionClearCallback(SelectionClearCallback callback) {
+        mSelectionClearCallback = callback;
+    }
+
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         //调用父类的onSelectionChanged时会发送一个AccessibilityEvent，当文本过大时造成异常
         //super.onSelectionChanged(selStart, selEnd);
         //父类构造函数会调用onSelectionChanged, 此时mCursorChangeCallbacks还没有初始化
         super.onSelectionChanged(selStart, selEnd);
+        // 文本选区被取消（光标模式），通知回调
+        if (selStart == selEnd && mSelectionClearCallback != null) {
+            mSelectionClearCallback.onSelectionCleared();
+        }
         if (mCursorChangeCallbacks == null || mCursorChangeCallbacks.isEmpty() || selStart != selEnd) {
             return;
         }
