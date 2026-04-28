@@ -113,7 +113,7 @@ public class CodeEditor extends HVScrollView {
             private double mLastScaleFactor = 1.0;
             private int mLastTextSize;
             private final int mMinTextSize = Integer.parseInt(getContext().getString(R.string.text_size_min_value));
-            private final int mMaxTextSize = Integer.parseInt(getContext().getString(R.string.text_size_max_value));;
+            private final int mMaxTextSize = Integer.parseInt(getContext().getString(R.string.text_size_max_value));
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
                 double currentFactor = Math.floor(detector.getScaleFactor() * 10) / 10;
@@ -128,7 +128,7 @@ public class CodeEditor extends HVScrollView {
             }
             @Override
             public boolean onScaleBegin(ScaleGestureDetector detector) {
-                mLastTextSize =Pref.getEditorTextSize((int) ViewUtils.pxToSp(getContext(), (int) mCodeEditText.getTextSize()));;
+                mLastTextSize =Pref.getEditorTextSize((int) ViewUtils.pxToSp(getContext(), (int) mCodeEditText.getTextSize()));
                 return true;
             }
             @Override
