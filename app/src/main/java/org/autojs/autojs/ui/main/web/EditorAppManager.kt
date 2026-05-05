@@ -117,6 +117,15 @@ class EditorAppManager : Fragment() {
             // ================================================================================
 
             if (documentSource.isLocal) {
+                // 获取实际的文档 URI（支持自定义本地路径）
+                val actualUri = if (documentSource == DocumentSource.DOC_V3_LOCAL) {
+                    // DOC_V3_LOCAL 优先使用用户自定义的本地路径
+                    val customLocalUrl = getSaveStatus(webView.context)
+                        .getString("custom_local_url", "")
+                    customLocalUrl?.takeIf { it.isNotBlank() } ?: documentSource.uri
+                } else {
+                    documentSource.uri
+                }
                 // 本地：统一走服务器
                 webView.webViewClient = android.webkit.WebViewClient()
 
@@ -124,23 +133,24 @@ class EditorAppManager : Fragment() {
                     override fun serve(session: IHTTPSession): Response {
                         val path = session.uri.removePrefix("/").ifEmpty { "index.html" }
 
-                        return if (documentSource.uri.startsWith("file://")) {
+                        return if (actualUri.startsWith("file://")) {
                             // SD卡
-                            val sdPath = documentSource.uri.removePrefix("file://")
+                            val sdPath = actualUri.removePrefix("file://")
                             val file = File(sdPath, path)
-
-                            // 懒加载补缺失文件（不覆盖）
-                            if (!file.exists()) {
-                                try {
-                                    val assetPath = "docs/v1/$path"
-                                    val input = webView.context.assets.open(assetPath)
-                                    file.parentFile?.mkdirs()
-                                    file.outputStream().use { input.copyTo(it) }
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
+                            // DOC_V2_LOCAL 是唯一需要懒加载的本地文档
+                            if (documentSource == DocumentSource.DOC_V2_LOCAL) {
+                                // 懒加载补缺失文件（不覆盖）
+                                if (!file.exists()) {
+                                    try {
+                                        val assetPath = "docs/v1/$path"
+                                        val input = webView.context.assets.open(assetPath)
+                                        file.parentFile?.mkdirs()
+                                        file.outputStream().use { input.copyTo(it) }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
                                 }
                             }
-
                             // 文件仍不存在则返回 404
                             if (!file.exists()) {
                                 return newFixedLengthResponse(
@@ -153,7 +163,7 @@ class EditorAppManager : Fragment() {
                             newChunkedResponse(Response.Status.OK, getMimeType(file.name), file.inputStream())
                         } else {
                             // assets
-                            val assetPath = "${documentSource.uri}/$path"
+                            val assetPath = "${actualUri}/$path"
                             val input = webView.context.assets.open(assetPath)
                             newChunkedResponse(Response.Status.OK, getMimeType(path), input)
                         }

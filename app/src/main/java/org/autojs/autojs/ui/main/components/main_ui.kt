@@ -89,7 +89,7 @@ fun DocumentPageMenuButton(getWebView: () -> WebView) {
                 CustomOnlineUrlDialog(getWebView()).show()
             }) {
                     Icon(imageVector = Icons.Default.Settings, contentDescription = null)
-                    Text(text = "自定义在线文档")
+                    Text(text = "自定义文档")
             }
             DropdownMenuItem(onClick = {
                 dismissMenu()
