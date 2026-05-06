@@ -191,7 +191,7 @@ class EditorAppManager : Fragment() {
                 webView.loadUrl("http://localhost:8080/")
             } else {
                 // 在线：直接加载
-                val url = if (documentSource == DocumentSource.DOC_V3) {
+                val url = if (documentSource == DocumentSource.DOC_V4) {
                     // 自定义在线文档 → 读取本地存储
                     val customUrl = getSaveStatus(webView.context)
                         .getString("custom_online_url", "")
