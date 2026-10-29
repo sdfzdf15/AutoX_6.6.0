@@ -54,7 +54,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EViewGroup;
 import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.ui.main.web.DocumentSource;
+
 import org.autojs.autojs.ui.main.web.EditorAppManager;
 import org.autojs.autoxjs.R;
 import org.autojs.autojs.autojs.AutoJs;
@@ -326,31 +326,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         setMenuItemStatus(R.id.save, false);
         setToggle_change(); // 设置切换按钮点击监听
 
-
-       /* if (mDocsWebView.getIsTbs()) {
-            mDocsWebView.getWebViewTbs().getSettings().setDisplayZoomControls(true);
-            mDocsWebView.getWebViewTbs().loadUrl(Pref.getDocumentationUrl() + "index.html");
-        } else {
-            mDocsWebView.getWebView().getSettings().setDisplayZoomControls(true);
-            mDocsWebView.getWebView().loadUrl(Pref.getDocumentationUrl() + "index.html");
-        }*/
-        // 核心：读取保存的文档源，自动加载对应文档
-        // 核心：读取保存的文档源，自动加载对应文档
-
-
-        // 核心：读取保存的文档源，自动加载对应文档
-        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
-        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
-        DocumentSource source;
-        try {
-            source = DocumentSource.valueOf(name);
-        } catch (IllegalArgumentException e) {
-            source = DocumentSource.DOC_V1; // 读取失败默认本地文档1
-        }
-
-        // 复用 switchDocument 逻辑，自动加载（统一用原生WebView，TBS自动兼容）
-        EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
-
+        EditorAppManager.Companion.loadHomeDocument(mDocsWebView.getWebView()); // 加载保存的文档源（支持自定义源）
 
         Themes.getCurrent(getContext())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -783,22 +759,17 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         }
         if (completion.getUrl() == null) return;
 
-        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
-        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
-        DocumentSource source;
-        try {
-            source = DocumentSource.valueOf(name);
-        } catch (IllegalArgumentException e) {
-            source = DocumentSource.DOC_V1;
-        }
+
 
         String url = completion.getUrl();
         String finalUrl;
-        if (source.isLocal()) {
-            EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
-            finalUrl = "http://localhost:8080/" + url;
+        if (EditorAppManager.Companion.isCurrentSourceLocal(getContext())) { // 如果是本地文档
+            // 服务由 EditorAppManager 统一管理，端口是随机的，不能再写死 8080
+            String base = EditorAppManager.Companion.localDocBaseUrl(mDocsWebView.getWebView());
+            finalUrl = base == null ? url : EditorAppManager.Companion.docUrl(base, url);
         } else {
-            finalUrl = source.getUri() + url;
+            finalUrl = EditorAppManager.Companion.docUrl(
+                    EditorAppManager.Companion.currentSourceUri(getContext()), url); // 拼接在线URL
         }
 
         showManual(finalUrl, completion.getHint());
@@ -835,22 +806,16 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
     @Override
     public void onModuleLongClick(Module module) {
-        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
-        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
-        DocumentSource source;
-        try {
-            source = DocumentSource.valueOf(name);
-        } catch (IllegalArgumentException e) {
-            source = DocumentSource.DOC_V1;
-        }
+
 
         String url = module.getUrl();
         String finalUrl;
-        if (source.isLocal()) {
-            EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
-            finalUrl = "http://localhost:8080/" + url;
-        } else {
-            finalUrl = source.getUri() + url;
+        if (EditorAppManager.Companion.isCurrentSourceLocal(getContext())) { // 如果是本地文档
+            String base = EditorAppManager.Companion.localDocBaseUrl(mDocsWebView.getWebView());
+            finalUrl = base == null ? url : EditorAppManager.Companion.docUrl(base, url); // 拼接本地URL
+        } else { // 否则
+            finalUrl = EditorAppManager.Companion.docUrl(
+                    EditorAppManager.Companion.currentSourceUri(getContext()), url); // 拼接在线URL
         }
 
         showManual(finalUrl, module.getName());
@@ -882,15 +847,6 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
     @Override
     public void onPropertyLongClick(Module m, Property property) {
 
-        // 1. 读取保存的文档源（在线/本地/本地2）
-        SharedPreferences sp = EditorAppManager.Companion.getSaveStatus(getContext());
-        String name = sp.getString(EditorAppManager.DocumentSourceKEY, DocumentSource.DOC_V1.name());
-        DocumentSource source;
-        try {
-            source = DocumentSource.valueOf(name);
-        } catch (IllegalArgumentException e) {
-            source = DocumentSource.DOC_V1; // 兜底默认本地文档1
-        }
 
         // 2. 完全保留你原有的url判断逻辑
         String url;
@@ -900,15 +856,14 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
             url = property.getUrl();
         }
 
-        // 3. 核心修复：根据文档源，正确拼接最终地址 + 启动服务器
+        // 3. 根据文档源正确拼接最终地址（本地端口是随机的，由 EditorAppManager 提供）
         String finalUrl;
-        if (source.isLocal()) {
-            // 本地文档：先复用switchDocument启动服务器，再拼接相对路径
-            EditorAppManager.Companion.switchDocument(mDocsWebView.getWebView(), source);
-            finalUrl = "http://localhost:8080/" + url;
-        } else {
-            // 在线文档：在线地址
-            finalUrl = source.getUri() + url;
+        if (EditorAppManager.Companion.isCurrentSourceLocal(getContext())) { // 如果是本地文档
+            String base = EditorAppManager.Companion.localDocBaseUrl(mDocsWebView.getWebView());
+            finalUrl = base == null ? url : EditorAppManager.Companion.docUrl(base, url); // 拼接本地URL
+        } else { // 否则
+            finalUrl = EditorAppManager.Companion.docUrl(
+                    EditorAppManager.Companion.currentSourceUri(getContext()), url); // 拼接在线URL
         }
 
         // 4. 打开文档

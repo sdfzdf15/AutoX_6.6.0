@@ -180,7 +180,7 @@ public class Pref {
     public static String getDocumentationUrl() {
 //        String docSource = def().getString(getString(R.string.key_documentation_source), null);
        // return "https://autoxjs.dayudada.com/";
-        return DocumentSource.DOC_V2_LOCAL.getUri();
+        return DocumentSource.DOC_V1_LOCAL.getUri();
     }
 
     public static boolean isFloatingMenuShown() {

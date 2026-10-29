@@ -5,8 +5,10 @@ import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
 import android.view.KeyEvent
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
 
 class SwipeRefreshWebView : ThemeColorSwipeRefreshLayout {
@@ -66,6 +68,23 @@ class SwipeRefreshWebView : ThemeColorSwipeRefreshLayout {
             // 5.0以上允许加载http和https混合的页面(5.0以下默认允许，5.0+默认禁止)
             mixedContentMode =
                 WebSettings.MIXED_CONTENT_ALWAYS_ALLOW;
+        }
+        // 不设置 WebViewClient 的话，点击页面里的链接会跳到外部浏览器。
+        // 这里统一在当前 WebView 内打开，保持文档浏览体验。
+        webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(
+                view: WebView,
+                request: WebResourceRequest
+            ): Boolean {
+                view.loadUrl(request.url.toString())
+                return true
+            }
+
+            @Deprecated("Deprecated in Java")
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                view.loadUrl(url)
+                return true
+            }
         }
     }
 
